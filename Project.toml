@@ -1,7 +1,12 @@
 name = "JuSwalbe"
 uuid = "eb6322ed-418d-497a-83f0-b052d1dea7c7"
-authors = ["Stefan Zitz"]
+authors = ["Stefan Zitz <physiknerd@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+Expectations = "2fe49d83-0758-5602-8f54-1f90ad0d522b"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 
 [compat]
 julia = "1.4"
