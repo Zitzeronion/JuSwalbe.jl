@@ -1,12 +1,13 @@
 module JuSwalbe
 
-import DelimitedFiles
-import JSON
+using DelimitedFiles, JSON
 
 include("call.jl")
+include("macroscopic_typs.jl")
+include("distribution_types.jl")
+include("readinput.jl")
+include("equilibriumcalculation.jl")
 
-greet() = print("Hello World!")
-
-export call
+export call, readinput, calc_equilibrium_distribution
 
 end # module
