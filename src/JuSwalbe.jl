@@ -1,7 +1,7 @@
 module JuSwalbe
 
 using Pkg
-using DelimitedFiles, JSON
+using DelimitedFiles, JSON, DrWatson
 
 include("call.jl")
 include("macroscopic_typs.jl")
