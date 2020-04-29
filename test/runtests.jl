@@ -1,7 +1,7 @@
 using JuSwalbe
 using Test
 
-Pkg.test("JuSwalbe")
-# @testset "JuSwalbe.jl" begin
-
-# end
+# Pkg.test("JuSwalbe", test_args=["call"])
+@testset "JuSwalbe.jl" begin
+    include("call.jl")
+end
