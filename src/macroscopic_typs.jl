@@ -12,14 +12,24 @@ mutable struct macroquant32_1d <: macroscopic_quantity
     energy::Vector{Float32}
 end
 
+mutable struct velocity64_2d <: macroscopic_quantity
+    x::Matrix{Float64}
+    y::Matrix{Float64}
+end
+
+mutable struct velocity32_2d <: macroscopic_quantity
+    x::Matrix{Float32}
+    y::Matrix{Float32}
+end
+
 mutable struct macroquant64_2d <: macroscopic_quantity
     height::Matrix{Float64}
-    velocity::Matrix{Float64}
+    velocity::velocity64_2d
     energy::Matrix{Float64}
 end
 
 mutable struct macroquant32_2d <: macroscopic_quantity
     height::Matrix{Float32}
-    velocity::Matrix{Float32}
+    velocity::velocity32_2d
     energy::Matrix{Float32}
 end
