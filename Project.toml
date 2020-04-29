@@ -4,7 +4,9 @@ authors = ["Stefan Zitz <physiknerd@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+Coverage = "a2441757-f6aa-5fb2-8edb-039e3f45d037"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
 Expectations = "2fe49d83-0758-5602-8f54-1f90ad0d522b"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
