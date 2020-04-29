@@ -1,5 +1,6 @@
 module JuSwalbe
 
+using Pkg
 using DelimitedFiles, JSON
 
 include("call.jl")
