@@ -1,0 +1,7 @@
+Lattice_points_x 10
+Lattice_points_y 5
+Max_run_time 1000
+Output_dump 100
+gravity 0.0
+surface_tension 0.01
+slippage 1.0

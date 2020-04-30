@@ -11,7 +11,7 @@ mutable struct macroquant32_1d <: macroscopic_quantity
     velocity::Vector{Float32}
     energy::Vector{Float32}
 end
-
+# TODO: Fix energy type, as it should be a tensor...
 mutable struct velocity64_2d <: macroscopic_quantity
     x::Matrix{Float64}
     y::Matrix{Float64}

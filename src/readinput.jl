@@ -1,3 +1,15 @@
+abstract type inputfile end
+
+struct inputconstants <: inputfile
+    lx::Int32
+    ly::Int32
+    maxruntime::Int64
+    dumping::Int32
+    gravity::Float64
+    γ::Float64
+    δ::Float64
+end
+
 function readinput(file)
     # Length of the input file
     num = countlines(file)
@@ -5,15 +17,17 @@ function readinput(file)
     input = readdlm(file)
     # Extracting of numerical values
     values = []
-    arguments = ["length", "time", "delta_t", "gravity", "surface_tension"]
+    arguments = ["Lattice_points_x", "Lattice_points_y", "Max_run_time", "Output_dump", "gravity", "surface_tension", "slippage"]
     for arg in arguments
         push!(values, findfirst(x -> x == arg, vec(input))) 
     end
-    length = input[values[1], 2]
-    maxtime = input[values[2], 2]
-    deltatime =  input[values[3], 2]
-    γ = input[values[5], 2]
-    g = input[values[4], 2]
+    runtimeconstants = inputconstants(input[values[1], 2], 
+                                      input[values[2], 2], 
+                                      input[values[3], 2],
+                                      input[values[4], 2],
+                                      input[values[5], 2],
+                                      input[values[6], 2],
+                                      input[values[7], 2])
     
-    return length, maxtime, deltatime, g, γ
+    return runtimeconstants
 end
