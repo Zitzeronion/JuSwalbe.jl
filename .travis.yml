@@ -22,6 +22,7 @@ jobs:
 # TODO: Check more travis.yml with Documenter integration to get this right!
 after_success:
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+  - julia -e 'using Pkg; Pkg.add("Documenter"); cd(Pkg.dir("JuSwalbe")); include(joinpath("docs", make.jl))'
 jobs:
   allow_failures:
     - julia: nightly
