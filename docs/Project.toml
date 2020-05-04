@@ -1,0 +1,4 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+JuSwalbe = "eb6322ed-418d-497a-83f0-b052d1dea7c7"
+

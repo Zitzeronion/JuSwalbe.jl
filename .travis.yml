@@ -9,6 +9,8 @@ julia:
   - 1.4
   - nightly
 
+
+
 notifications:
   email: false
 
@@ -24,8 +26,3 @@ jobs:
 # TODO: Check more travis.yml with Documenter integration to get this right!
 after_success:
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
-
-# jobs:
-#   allow_failures:
-#     - julia: nightly
-#   fast_finish: true
