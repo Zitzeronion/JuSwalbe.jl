@@ -9,6 +9,8 @@ Therefore the equilibrium is calculated from macroscopic quantities, i.e. height
 There are plenty of ways to calculate them I mainly used: [Pham van Thang, Bastien Chopard, Laurent Lefevre, Diemer Anda Ondo, Eduardo Mendes. 
 Study of the 1D lattice Boltzmann shallow water equation and its coupling to build a canal network. 
 Journal of Computational Physics, Elsevier, 2010, 229 (19), pp.7373-7400. 10.1016/j.jcp.2010.06.022](https://www.sciencedirect.com/science/article/pii/S0021999110003372)
+
+
 """
 function calc_equilibrium_distribution(mom::macroquant64_1d, gravity=0)
     len = length(mom.height)
