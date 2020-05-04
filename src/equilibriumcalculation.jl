@@ -8,7 +8,13 @@ As the expansion is made around the equilibrium, lattice Boltzmann always assume
 Therefore the equilibrium is calculated from macroscopic quantities, i.e. height `.height` and velocity `.velocity`.
 There are plenty of ways to calculate them I mainly the ones derived in Eq.(13) of [Study of the 1D lattice Boltzmann shallow water equation and its coupling to build a canal network.](https://www.sciencedirect.com/science/article/pii/S0021999110003372)
 
-
+# Math
+Defining equations in one spatial dimensions are expressed in the following way
+``\\begin{align*} 
+f_0^{eq} &=  h - \\frac{1}{2v^2}gh^2 - \\frac{1}{v^2}hu^2 \\ 
+f_1^{eq} &=  \\frac{1}{4v^2}gh^2 + \\frac{1}{2v}hu + \\frac{1}{2v^2}hu^2 \\
+f_2^{eq} &=  \\frac{1}{4v^2}gh^2 - \\frac{1}{2v}hu + \\frac{1}{2v^2}hu^2 
+\\end{align*}``
 """
 function calc_equilibrium_distribution(mom::macroquant64_1d, gravity=0)
     len = length(mom.height)
