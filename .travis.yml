@@ -18,14 +18,13 @@ jobs:
       julia: 1.4
       os: linux
       script:
-        - julia --project=docs/ docs/setup.jl
+        - julia --project=docs/ -e docs/setup.jl
         - julia --project=docs/ docs/make.jl
       after_success: skip
 # TODO: Check more travis.yml with Documenter integration to get this right!
 after_success:
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
-#  - julia --project -e 'import Pkg; Pkg.add("Documenter"); Pkg.add("DocumenterTools")' 
-#  - julia --project ./docs/make.jl
+
 # jobs:
 #   allow_failures:
 #     - julia: nightly

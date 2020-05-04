@@ -19,7 +19,9 @@ Run for 100 lattice Boltzmann time steps only printing output every 10 time step
 Having no gravity and a surface tension of 0.01 and a slip length of 1.  
 
 # Example
-```jldoctest
+```jldoctest firsttest
+julia> using JuSwalbe
+
 julia> new_input = JuSwalbe.inputconstants(20, 20, 100, 10, 0.0, 0.01, 1.0)
 JuSwalbe.inputconstants(20, 20, 100, 10, 0.0, 0.01, 1.0)
 
@@ -40,14 +42,28 @@ end
 """
     readinput(file)
 
-Given a `file` reads input parameters from it.
+Reads input parameters from a `file`.
 
 The expected amount of parameters can be addressed with [`inputconstants`](@ref).
 For now it expects seven values for different runtime constants.
 
 # Example
-```jldoctest
-julia> test = readinput("test/test.txt")
+```jldoctest secondtest
+julia> using JuSwalbe, DelimitedFiles
+
+julia> args = ["Lattice_points_x" 10; "Lattice_points_y" 5; "Max_run_time" 1000; "Output_dump" 100; "gravity" 0.0; "surface_tension" 0.01; "slippage" 1.0] # Generate a text file with input
+7×2 Array{Any,2}:
+ "Lattice_points_x"    10
+ "Lattice_points_y"     5
+ "Max_run_time"      1000
+ "Output_dump"        100
+ "gravity"              0.0
+ "surface_tension"      0.01
+ "slippage"             1.0
+
+julia> writedlm("test.txt", args)
+
+julia> test = readinput("test.txt")
 JuSwalbe.inputconstants(10, 5, 1000, 100, 0.0, 0.01, 1.0)
 
 julia> test.lx
@@ -61,6 +77,8 @@ julia> test.γ + test.δ
 
 julia> isa(test.lx + test.gravity, Int32)
 false
+
+julia> rm("test.txt")
 ```
 """
 function readinput(file)
