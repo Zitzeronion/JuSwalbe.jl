@@ -49,16 +49,51 @@
             @test test_disj[i,j] == result
         end
     end
-    @testset "Filmpressure_nolaplacian_2d_array" begin
+    
+    @testset "Filmpressure_nothing_2d_moment" begin
         N, M = (4,4)
-        height = ones(N,M)
+        moment = JuSwalbe.macroquant64_2d(reshape(collect(1.0:1.0:(N*M)),N,M), JuSwalbe.velocity64_2d(zeros(N,M),zeros(N,M)),zeros(N,M))
         # Make the laplace calculation
-        test_pressure = pressure(height, γ=1.0)
+        # Make the laplace calculation
+        test_pressure = pressure(moment, γ=1.0)
+        # Test the dimensions
+        @test size(test_pressure) == (N,M)
+        result = 0.0
+        # Compare the results
+        for j in 1:M, i in 1:N
+            @test test_pressure[i,j] == result
+        end
+    end
+    @testset "Filmpressure_nodisjoining_2d_moment" begin
+        N, M = (4,4)
+        moment = JuSwalbe.macroquant64_2d(reshape(collect(1.0:1.0:(N*M)),N,M), JuSwalbe.velocity64_2d(zeros(N,M),zeros(N,M)),zeros(N,M))
+        # Make the laplace calculation
+        test_pressure = pressure(moment, θ=0.0, γ=0.1)
+        # Test the dimensions
+        @test size(test_pressure) == (N,M)
+        # Compare the results
+        @test test_pressure == -0.1*Δh(moment)
+    end
+    @testset "Filmpressure_2d_moment" begin
+        N, M = (4,4)
+        moment = JuSwalbe.macroquant64_2d(reshape(collect(1.0:1.0:(N*M)),N,M), JuSwalbe.velocity64_2d(zeros(N,M),zeros(N,M)),zeros(N,M))
+        # Make the laplace calculation
+        test_pressure = pressure(moment, θ=1.0/9.0, γ=0.1)
+        # Test the dimensions
+        @test size(test_pressure) == (N,M)
+        # Compare the results
+        @test test_pressure == -0.1*Δh(moment) .+ Π(moment, γ=0.1)
+    end
+    @testset "Filmpressure_nolaplacian_2d_moment" begin
+        N, M = (4,4)
+        moment = JuSwalbe.macroquant64_2d(ones(N,M), JuSwalbe.velocity64_2d(zeros(N,M),zeros(N,M)),zeros(N,M))
+        # Make the laplace calculation
+        test_pressure = pressure(moment, γ=1.0)
         # Test the dimensions
         @test size(test_pressure) == (N,M)
         
         # Compare the results
-        @test test_pressure == Π(height, γ=1.0)
+        @test test_pressure == Π(moment, γ=1.0)
         
     end
     @testset "Filmpressure_nothing_2d_array" begin
@@ -73,6 +108,18 @@
         for j in 1:M, i in 1:N
             @test test_pressure[i,j] == result
         end
+    end
+    @testset "Filmpressure_nolaplacian_2d_array" begin
+        N, M = (4,4)
+        height = ones(N,M)
+        # Make the laplace calculation
+        test_pressure = pressure(height, γ=1.0)
+        # Test the dimensions
+        @test size(test_pressure) == (N,M)
+        
+        # Compare the results
+        @test test_pressure == Π(height, γ=1.0)
+        
     end
     @testset "Filmpressure_nodisjoining_2d_array" begin
         N, M = (4,4)
