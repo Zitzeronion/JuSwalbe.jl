@@ -12,7 +12,9 @@ Therefore the equilibrium is calculated from macroscopic quantities, i.e. height
 Defining equations in one spatial dimensions are expressed in the following way
 
 ``f_0^{eq} =  h - \\frac{1}{2v^2}gh^2 - \\frac{1}{v^2}hu^2`` 
+
 ``f_1^{eq} =  \\frac{1}{4v^2}gh^2 + \\frac{1}{2v}hu + \\frac{1}{2v^2}hu^2``
+
 ``f_2^{eq} =  \\frac{1}{4v^2}gh^2 - \\frac{1}{2v}hu + \\frac{1}{2v^2}hu^2 ``
 
 ## Two spatial dimension
@@ -20,7 +22,8 @@ In two spatial dimensions the velocity because a vector with a `x` and `y` compo
 Such the equations look a little more complex
 
 ``f_0^{eq} =  h - \\frac{4}{9}h(\\frac{15}{2}gh - \\frac{3}{2}u^2)``
-``f_i^{eq} = w_i h(\\frac{3}{2}gh + 3 \\mathbf{c}_i\\cdot\\mathbf{u} + \\frac{9}{2}(\\mathbf{c}_i\\cdot\\mathbf{u})^2 - \\frac{3}{2}u^2))
+
+``f_i^{eq} = w_i h(\\frac{3}{2}gh + 3 \\mathbf{c}_i\\cdot\\mathbf{u} + \\frac{9}{2}(\\mathbf{c}_i\\cdot\\mathbf{u})^2 - \\frac{3}{2}u^2))``
 
 with i are the number of lattice speeds and w_i and c_i are the weights and sets of lattice velocities. 
 
@@ -159,12 +162,13 @@ julia> moment.velocity.x
  0.1  0.1  0.1  0.1
  0.1  0.1  0.1  0.1
 
-julia> velocitysquared(moment)
+julia> JuSwalbe.velocitysquared(moment)
 4×4 Array{Float64,2}:
  0.05  0.05  0.05  0.05
  0.05  0.05  0.05  0.05
  0.05  0.05  0.05  0.05
  0.05  0.05  0.05  0.05
+```
 """
 function velocitysquared(mom::macroquant64_2d)
     velsquared = mom.velocity.x.^2 + mom.velocity.y.^2
