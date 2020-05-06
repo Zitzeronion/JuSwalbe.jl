@@ -52,8 +52,7 @@
     
     @testset "Filmpressure_nothing_2d_moment" begin
         N, M = (4,4)
-        moment = JuSwalbe.macroquant64_2d(reshape(collect(1.0:1.0:(N*M)),N,M), JuSwalbe.velocity64_2d(zeros(N,M),zeros(N,M)),zeros(N,M))
-        # Make the laplace calculation
+        moment = JuSwalbe.macroquant64_2d(fill(0.1, (N,M)), JuSwalbe.velocity64_2d(zeros(N,M),zeros(N,M)), zeros(N,M))
         # Make the laplace calculation
         test_pressure = pressure(moment, γ=1.0)
         # Test the dimensions
