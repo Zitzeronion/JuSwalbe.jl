@@ -262,15 +262,15 @@ julia> velx = zeros(Float64, (4,4))
 
 julia> vely = zeros(Float64, (4,4))
 4×4 Array{Float64,2}:
-  0.0  0.0  0.0  0.0
-  0.0  0.0  0.0  0.0
-  0.0  0.0  0.0  0.0
-  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
  
 julia> vel = JuSwalbe.Twovector(velx, vely)
 JuSwalbe.Twovector{Array{Float64,2}}([0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0], [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0])
 
-julia> moment = JuSwalbe.Macroquant(height, vel, zeros(4,4)), zeros(4,4))
+julia> moment = JuSwalbe.Macroquant(height, vel, zeros(4,4), zeros(4,4))
 JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}([1.0 5.0 9.0 13.0; 2.0 6.0 10.0 14.0; 3.0 7.0 11.0 15.0; 4.0 8.0 12.0 16.0], JuSwalbe.Twovector{Array{Float64,2}}([0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0], [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]), [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0], [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0])
 
 julia> moment.height
@@ -287,7 +287,24 @@ julia> laplace = Δh(moment)
  16.0   0.0   0.0  -16.0
  12.0  -4.0  -4.0  -20.0
 
-julia> height = collect(1.0:16.0) # Same for one dimension
+julia> height = collect(1.0:16.0)
+16-element Array{Float64,1}:
+  1.0
+  2.0
+  3.0
+  4.0
+  5.0
+  6.0
+  7.0
+  8.0
+  9.0
+ 10.0
+ 11.0
+ 12.0
+ 13.0
+ 14.0
+ 15.0
+ 16.0
 
 julia> Δh(height)
 16-element Array{Float64,1}:

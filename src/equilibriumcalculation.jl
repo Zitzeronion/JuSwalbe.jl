@@ -143,7 +143,7 @@ With lower case `x` and `y` the respective component of the velocity vector is a
 julia> using JuSwalbe
 
 julia> velocities = JuSwalbe.Twovector{Matrix{Float64}}(fill(0.1, (4,4)),fill(0.2, (4,4)))
-Twovector{Array{Float64,2}}([0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1], [0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2])
+JuSwalbe.Twovector{Array{Float64,2}}([0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1], [0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2])
 
 julia> moment = JuSwalbe.Macroquant{Matrix{Float64},JuSwalbe.Twovector{Matrix{Float64}}}(ones(Float64, (4,4)), velocities, ones(Float64, (4,4)), ones(Float64, (4,4)))
 JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}([1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0], JuSwalbe.Twovector{Array{Float64,2}}([0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1], [0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2]), [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0], [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0])
