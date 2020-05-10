@@ -188,8 +188,10 @@
             @test size(test_pressure1) == (N,M)
             @test size(test_pressure2) == (N,M)
             # Compare the results
-            @test test_pressure1 - (type(-0.1)*Δh(moment)) ≈ 0 tolerances[type]
-            @test test_pressure2 - (type(-0.1)*Δh(testheight)) ≈ 0 tolerances[type]
+            for i in 1:N, j in 1:M
+                @test test_pressure1[i,j] - (type(-0.1)*Δh(moment))[i,j] ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure2[i,j] - (type(-0.1)*Δh(testheight))[i,j] ≈ type(0.0) atol = tolerances[type]
+            end
         end
     end
 
@@ -208,8 +210,10 @@
             @test length(test_pressure1) == N
             @test length(test_pressure2) == N
             # Compare the results
-            @test test_pressure1 - (type(-0.1)*Δh(moment)) ≈ 0 tolerances[type]
-            @test test_pressure2 - (type(-0.1)*Δh(testheight)) ≈ 0 tolerances[type]
+            for i in 1:N
+                @test test_pressure1[i] - (type(-0.1)*Δh(moment))[i] ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure2[i] - (type(-0.1)*Δh(testheight))[i] ≈ type(0.0) atol = tolerances[type]
+            end
         end
     end
     
@@ -217,11 +221,11 @@
         N, M = (4,4)
         typelist = [Float16 Float32 Float64]
         for type in typelist
-            testheight = ones(type, (N,M)) .* reshape(collect(1:N*M),N,M)
+            testheight = ones(type, (N,M))
             moment = JuSwalbe.Macroquant(testheight, JuSwalbe.Twovector(zeros(type ,(N,M)),zeros(type ,(N,M))), zeros(type ,(N,M)), zeros(type ,(N,M)))
             # Make the laplace calculation
-            test_pressure1 = pressure(moment, γ=1.0)
-            test_pressure2 = pressure(testheight, γ=1.0)
+            test_pressure1 = pressure(moment, γ=type(1.0))
+            test_pressure2 = pressure(testheight, γ=type(1.0))
             # Test the dimensions
             @test isa(test_pressure1, Array{type,2})
             @test isa(test_pressure2, Array{type,2})
@@ -229,54 +233,79 @@
             @test size(test_pressure2) == (N,M)
             # Compare the results
             for i in 1:N, j in 1:M
-                @test test_pressure1[i,j] - Π(moment, γ=1.0)[i,j] ≈ 0 tolerances[type]
-                @test test_pressure2[i,j] - Π(moment, γ=1.0)[i,j] ≈ 0 tolerances[type]
-        end
-        
-    end
-    @testset "Filmpressure_nothing_2d_array" begin
-        N, M = (4,4)
-        height = fill(0.1, (N,M))
-        # Make the laplace calculation
-        test_pressure = pressure(height, γ=1.0)
-        # Test the dimensions
-        @test size(test_pressure) == (N,M)
-        result = 0.0
-        # Compare the results
-        for j in 1:M, i in 1:N
-            @test test_pressure[i,j] == result
+                @test test_pressure1[i,j] - Π(moment, γ=type(1.0))[i,j] ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure2[i,j] - Π(testheight, γ=type(1.0))[i,j] ≈ type(0.0) atol = tolerances[type]
+            end
         end
     end
-    @testset "Filmpressure_nolaplacian_2d_array" begin
-        N, M = (4,4)
-        height = ones(N,M)
-        # Make the laplace calculation
-        test_pressure = pressure(height, γ=1.0)
-        # Test the dimensions
-        @test size(test_pressure) == (N,M)
-        
-        # Compare the results
-        @test test_pressure == Π(height, γ=1.0)
-        
+
+    @testset "Filmpressure NoLaplacian one dimensional" begin
+        N = 4
+        typelist = [Float16 Float32 Float64]
+        for type in typelist
+            testheight = ones(type, N)
+            moment = JuSwalbe.Macroquant(testheight, zeros(type ,N), zeros(type ,N), zeros(type ,N))
+                
+            test_pressure1 = pressure(moment, γ=type(1.0))
+            test_pressure2 = pressure(testheight, γ=type(1.0))
+            # Test the dimensions
+            @test isa(test_pressure1, Array{type,1})
+            @test isa(test_pressure2, Array{type,1})
+            @test length(test_pressure1) == N
+            @test length(test_pressure2) == N
+            # Compare the results
+            for i in 1:N
+                @test test_pressure1[i] - Π(moment, γ=type(1.0))[i] ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure2[i] - Π(testheight, γ=type(1.0))[i] ≈ type(0.0) atol = tolerances[type]
+            end
+        end
     end
-    @testset "Filmpressure_nodisjoining_2d_array" begin
+
+    @testset "Filmpressure all two dimensional" begin
         N, M = (4,4)
-        height = reshape(collect(1.0:1.0:(N*M)),N,M)
-        # Make the laplace calculation
-        test_pressure = pressure(height, θ=0.0, γ=0.1)
-        # Test the dimensions
-        @test size(test_pressure) == (N,M)
-        # Compare the results
-        @test test_pressure == -0.1*Δh(height)
+        typelist = [Float16 Float32 Float64]
+        for type in typelist
+            testheight = ones(type, (N,M)) .* reshape(collect(1:N*M),N,M)
+            moment = JuSwalbe.Macroquant(testheight, JuSwalbe.Twovector(zeros(type ,(N,M)),zeros(type ,(N,M))), zeros(type ,(N,M)), zeros(type ,(N,M)))
+        
+            # Make the laplace calculation
+            test_pressure1 = pressure(moment, γ=type(1.0))
+            test_pressure2 = pressure(testheight, γ=type(1.0))
+            # Test the dimensions
+            @test isa(test_pressure1, Array{type,2})
+            @test isa(test_pressure2, Array{type,2})
+            @test size(test_pressure1) == (N,M)
+            @test size(test_pressure2) == (N,M)
+            
+            # Compare the results
+            for j in 1:M, i in 1:N
+                @test test_pressure1[i,j] - (type(-1.0)*Δh(moment)[i,j] + Π(moment, γ=type(1.0))[i,j]) ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure2[i,j] - (type(-1.0)*Δh(testheight)[i,j] + Π(testheight, γ=type(1.0))[i,j]) ≈ type(0.0) atol = tolerances[type]
+            end
+        end
     end
-    @testset "Filmpressure_2d_array" begin
-        N, M = (4,4)
-        height = reshape(collect(1.0:1.0:(N*M)),N,M)
-        # Make the laplace calculation
-        test_pressure = pressure(height, θ=1.0/9.0, γ=0.1)
-        # Test the dimensions
-        @test size(test_pressure) == (N,M)
-        # Compare the results
-        @test test_pressure == -0.1*Δh(height) .+ Π(height, γ=0.1)
+    
+    @testset "Filmpressure all one dimensional" begin
+        N = 4
+        typelist = [Float16 Float32 Float64]
+        for type in typelist
+            testheight = ones(type, N) .* collect(1:N)
+            moment = JuSwalbe.Macroquant(testheight, zeros(type ,N), zeros(type ,N), zeros(type ,N))
+        
+            # Make the laplace calculation
+            test_pressure1 = pressure(moment, γ=type(1.0))
+            test_pressure2 = pressure(testheight, γ=type(1.0))
+            # Test the dimensions
+            @test isa(test_pressure1, Array{type,1})
+            @test isa(test_pressure2, Array{type,1})
+            @test length(test_pressure1) == N
+            @test length(test_pressure2) == N
+            
+            # Compare the results
+            for i in 1:N
+                @test test_pressure1[i] - (type(-1.0)*Δh(moment)[i] + Π(moment, γ=type(1.0))[i]) ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure2[i] - (type(-1.0)*Δh(testheight)[i] + Π(testheight, γ=type(1.0))[i]) ≈ type(0.0) atol = tolerances[type]
+            end
+        end
     end
 end
