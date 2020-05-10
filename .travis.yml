@@ -16,7 +16,7 @@ jobs:
   allow_failures:
     - julia: nightly
   include:
-    - stage: "Documentation"
+    - stage: "documentation"
       julia: 1.4
       os: linux
       script:
