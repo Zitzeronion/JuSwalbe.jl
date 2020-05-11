@@ -127,6 +127,8 @@ julia> mom1d.velocity
  0.25
  0.25
 
+```
+
 # References
 ## Two spatial dimensions
 Here I go with Dellar
@@ -136,8 +138,6 @@ Here I go with Dellar
 For the one dimensional simulation the paper by Chopard is quite nice
 - [Study of the 1D lattice Boltzmann shallow water equation and its coupling to build a canal network.](https://www.sciencedirect.com/science/article/pii/S0021999110003372)
 
-
-```
 """
 function calculatemoments(dist::JuSwalbe.DistributionD1Q3{Vector{T}}) where {T<:Number}
     # Get a size for the output arrays
