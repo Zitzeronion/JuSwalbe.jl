@@ -5,6 +5,7 @@ Computes the lattice Boltzmann moments (h,v) from a distribution function `dist`
 
 Based on the input either a `D1Q3` or a `D2Q9` distribution this function performs a summation over the particle speeds.
 In one spatial dimension the velocity set [-1, 0, 1] allows for three speeds in two for nine speeds.
+See also: [`dist2array`](@ref)
 
 # Math
 The moments are calculated according to 
@@ -16,6 +17,7 @@ The moments are calculated according to
 `` e = \\sum_{i=0}^N \\mathbf{c}_i \\mathbf{c}_i f_i ``
 
 Where N is either 3 or 9. In one spatial dimension the velocity is of course not a vector of ``(x,y)``.
+
 
 # Example
 ```jldoctest
@@ -173,7 +175,7 @@ function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:
     lattice_vel = [0.0 0.0; 1.0 0.0; 0.0 1.0; -1.0 0.0; 0.0 -1.0; 1.0 1.0; -1.0 1.0; -1.0 -1.0; 1.0 -1.0]
     indices = [Symbol("f$(i-1)") for i in 1:9]
     # Store all distributions in an array
-    distarray = makearray(dist)
+    distarray = dist2array(dist)
     # The moments are just a summation of distribution functions
     height = sum(distarray, dims=1)[1, :, :]
     velocityx = sum(distarray .* lattice_vel[:, 1], dims=1)[1, :, :]
@@ -189,6 +191,93 @@ function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:
 end
 
 """
+    dist2array(dist)
+
+Transforms the `D2Q9` struct into a three dimensional array.
+
+Axis are chosen such that it can be easily multiplied with the nine speed lattice speeds.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> a = fill(0.1, (5,5))
+5×5 Array{Float64,2}:
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+julia> b = fill(0.2, (5,5))
+5×5 Array{Float64,2}:
+ 0.2  0.2  0.2  0.2  0.2
+ 0.2  0.2  0.2  0.2  0.2
+ 0.2  0.2  0.2  0.2  0.2
+ 0.2  0.2  0.2  0.2  0.2
+ 0.2  0.2  0.2  0.2  0.2
+
+julia> dist = JuSwalbe.DistributionD2Q9(a,b,a,a,a,a,a,a,a)
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}([0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1], [0.2 0.2 … 0.2 0.2; 0.2 0.2 … 0.2 0.2; … ; 0.2 0.2 … 0.2 0.2; 0.2 0.2 … 0.2 0.2], [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1], [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1], [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1], [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1], [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1], [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1], [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1])
+
+julia> arr = dist2array(dist)
+9×5×5 Array{Float64,3}:
+[:, :, 1] =
+ 0.1  0.1  0.1  0.1  0.1
+ 0.2  0.2  0.2  0.2  0.2
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+[:, :, 2] =
+ 0.1  0.1  0.1  0.1  0.1
+ 0.2  0.2  0.2  0.2  0.2
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+[:, :, 3] =
+ 0.1  0.1  0.1  0.1  0.1
+ 0.2  0.2  0.2  0.2  0.2
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+[:, :, 4] =
+ 0.1  0.1  0.1  0.1  0.1
+ 0.2  0.2  0.2  0.2  0.2
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+[:, :, 5] =
+ 0.1  0.1  0.1  0.1  0.1
+ 0.2  0.2  0.2  0.2  0.2
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+```
 
 """
 function dist2array(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:Number}

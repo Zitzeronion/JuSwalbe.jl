@@ -1,4 +1,5 @@
 @testset "Moment calculation" begin
+    tolerances = Dict(Float16 => 1e-3, Float32 => 1e-5, Float64 => 1e-7, Real => 1e-7)
     @testset "D2Q9" begin
         @testset "With velocity in ux" begin
             typelist = [Float16 Float32 Float64]
@@ -9,13 +10,13 @@
                 @test isa(testdist, JuSwalbe.DistributionD2Q9)
                 mom = calculatemoments(testdist)
                 @test isa(mom, JuSwalbe.Macroquant)
-                @test size(mom.height) = (5,5)
-                @test size(mom.velocity.x) = (5,5)
-                @test size(mom.velocity.y) = (5,5)
+                @test size(mom.height) == (5,5)
+                @test size(mom.velocity.x) == (5,5)
+                @test size(mom.velocity.y) == (5,5)
                 for i in 1:5, j in 1:5
-                    @test (mom.height[i,j] - type(1.0)) ≈ type(0.0) atol = 1e-5 
-                    @test (mom.velocity.x[i,j] - type(0.1)) ≈ type(0.0) atol = 1e-5
-                    @test (mom.velocity.y[i,j] - type(0.0)) ≈ type(0.0) atol = 1e-5  
+                    @test (mom.height[i,j] - type(1.0)) ≈ type(0.0) atol = tolerances[type] 
+                    @test (mom.velocity.x[i,j] - type(0.1/1.0)) ≈ type(0.0) atol = tolerances[type]
+                    @test (mom.velocity.y[i,j] - type(0.0/1.0)) ≈ type(0.0) atol = tolerances[type]  
                 end
             end
         end
@@ -28,13 +29,13 @@
                 @test isa(testdist, JuSwalbe.DistributionD2Q9)
                 mom = calculatemoments(testdist)
                 @test isa(mom, JuSwalbe.Macroquant)
-                @test size(mom.height) = (5,5)
-                @test size(mom.velocity.x) = (5,5)
-                @test size(mom.velocity.y) = (5,5)
+                @test size(mom.height) == (5,5)
+                @test size(mom.velocity.x) == (5,5)
+                @test size(mom.velocity.y) == (5,5)
                 for i in 1:5, j in 1:5
-                    @test (mom.height[i,j] - type(1.0)) ≈ type(0.0) atol = 1e-5 
-                    @test (mom.velocity.x[i,j] - type(0.0)) ≈ type(0.0) atol = 1e-5
-                    @test (mom.velocity.y[i,j] - type(0.1)) ≈ type(0.0) atol = 1e-5  
+                    @test (mom.height[i,j] - type(1.0)) ≈ type(0.0) atol = tolerances[type] 
+                    @test (mom.velocity.x[i,j] - type(0.0/1.0)) ≈ type(0.0) atol = tolerances[type]
+                    @test (mom.velocity.y[i,j] - type(0.1/1.0)) ≈ type(0.0) atol = tolerances[type]  
                 end
             end
         end
@@ -47,17 +48,16 @@
                 @test isa(testdist, JuSwalbe.DistributionD2Q9)
                 mom = calculatemoments(testdist)
                 @test isa(mom, JuSwalbe.Macroquant)
-                @test size(mom.height) = (5,5)
-                @test size(mom.velocity.x) = (5,5)
-                @test size(mom.velocity.y) = (5,5)
+                @test size(mom.height) == (5,5)
+                @test size(mom.velocity.x) == (5,5)
+                @test size(mom.velocity.y) == (5,5)
                 for i in 1:5, j in 1:5
-                    @test (mom.height[i,j] - type(1.1)) ≈ type(0.0) atol = 1e-5 
-                    @test (mom.velocity.x[i,j] - type(0.1)) ≈ type(0.0) atol = 1e-5
-                    @test (mom.velocity.y[i,j] - type(0.1)) ≈ type(0.0) atol = 1e-5  
+                    @test (mom.height[i,j] - type(1.1)) ≈ type(0.0) atol = tolerances[type] 
+                    @test (mom.velocity.x[i,j] - type(0.1/1.1)) ≈ type(0.0) atol = tolerances[type]
+                    @test (mom.velocity.y[i,j] - type(0.1/1.1)) ≈ type(0.0) atol = tolerances[type]  
                 end
             end
         end
-
         @testset "Without velocity" begin
             typelist = [Float16 Float32 Float64]
             for type in typelist
@@ -67,13 +67,13 @@
                 @test isa(testdist, JuSwalbe.DistributionD2Q9)
                 mom = calculatemoments(testdist)
                 @test isa(mom, JuSwalbe.Macroquant)
-                @test size(mom.height) = (5,5)
-                @test size(mom.velocity.x) = (5,5)
-                @test size(mom.velocity.y) = (5,5)
+                @test size(mom.height) == (5,5)
+                @test size(mom.velocity.x) == (5,5)
+                @test size(mom.velocity.y) == (5,5)
                 for i in 1:5, j in 1:5
-                    @test (mom.height[i,j] - type(1.1)) ≈ type(0.0) atol = 1e-5 
-                    @test (mom.velocity.x[i,j] - type(0.0)) ≈ type(0.0) atol = 1e-5
-                    @test (mom.velocity.y[i,j] - type(0.0)) ≈ type(0.0) atol = 1e-5  
+                    @test (mom.height[i,j] - type(0.9)) ≈ type(0.0) atol = tolerances[type] 
+                    @test (mom.velocity.x[i,j] - type(0.0)) ≈ type(0.0) atol = tolerances[type]
+                    @test (mom.velocity.y[i,j] - type(0.0)) ≈ type(0.0) atol = tolerances[type]  
                 end
             end
         end
@@ -89,12 +89,11 @@
                 @test isa(testdist, JuSwalbe.DistributionD1Q3)
                 mom = calculatemoments(testdist)
                 @test isa(mom, JuSwalbe.Macroquant)
-                @test length(mom.height) = 10
-                @test length(mom.velocity.x) = 10
-                @test length(mom.velocity.y) = 10
+                @test length(mom.height) == 10
+                @test length(mom.velocity) == 10
                 for i in 1:10
-                    @test (mom.height[i] - type(0.4)) ≈ 0.0 atol = 1e-5 
-                    @test (mom.velocity[i] - type(0.1)) ≈ 0.0 atol = 1e-5  
+                    @test (mom.height[i] - type(0.4)) ≈ 0.0 atol = tolerances[type] 
+                    @test (mom.velocity[i] - type(0.1/0.4)) ≈ 0.0 atol = tolerances[type]  
                 end
             end
         end
@@ -107,16 +106,16 @@
                 @test isa(testdist, JuSwalbe.DistributionD1Q3)
                 mom = calculatemoments(testdist)
                 @test isa(mom, JuSwalbe.Macroquant)
-                @test length(mom.height) = 10
-                @test length(mom.velocity.x) = 10
-                @test length(mom.velocity.y) = 10
+                @test length(mom.height) == 10
+                @test length(mom.velocity) == 10
                 for i in 1:10
-                    @test (mom.height[i] - type(0.3)) ≈ 0.0 atol = 1e-5 
-                    @test (mom.velocity[i] - type(0.0)) ≈ 0.0 atol = 1e-5  
+                    @test (mom.height[i] - type(0.3)) ≈ 0.0 atol = tolerances[type] 
+                    @test (mom.velocity[i] - type(0.0)) ≈ 0.0 atol = tolerances[type]
                 end
             end
         end
     end
+
     @testset "Distribution to Array" begin
         typelist = [Float16 Float32 Float64]
         for type in typelist
@@ -126,9 +125,12 @@
             @test isa(testdist, JuSwalbe.DistributionD2Q9)
             arr = dist2array(testdist)
             @test isa(arr, Array{type, 3})
-            @test size(arr) = (9,5,5)
-            @test testarray1 == arr[1,:,:]
-            @test testarray2 == arr[3,:,:]
+            @test size(arr) == (9,5,5)
+            for i in 1:5, j in 1:5
+                @test testarray1[i,j] == arr[1,i,j]
+                @test testarray2[i,j] == arr[3,i,j]
+            end
+        end
     end
 end
 
