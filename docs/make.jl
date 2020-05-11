@@ -8,5 +8,5 @@ makedocs(
     pages=["index.md", "manual.md", "reference.md", "devnotes.md"])
 
 deploydocs(
-    repo = "github.com/Zitzeronion/JuSwalbe.git",
+    repo = "github.com/Zitzeronion/JuSwalbe.jl.git",
 )

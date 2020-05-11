@@ -1,5 +1,5 @@
 """
-    calc_equilibrium_distribution(mom:macroquant64_1d, gravity=0)
+    calc_equilibrium_distribution(mom::JuSwalbe.Macroquant; gravity=0)
 
 Calculates the equilibrium distributions based on the macroscopic quantities `mom` and gravitational acceleration `gravity`.
 
@@ -38,45 +38,24 @@ There are plenty of ways to calculate them I mainly the ones derived in Eq.(13) 
 Here I stick to the paper written by Paul Dellar, Eq.(26) of [Nonhydrodynamic modes and *a priori* construction of shallow water lattice Boltzmann equations](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.65.036309)
 Originally these equilibria have been worked out by Paul Salmon.
 """
-function calc_equilibrium_distribution(mom::macroquant64_1d, gravity=0)
+function calc_equilibrium_distribution(mom::JuSwalbe.Macroquant{Vector{T}, Vector{T}}; gravity::T=T(0)) where {T<:Number}
     len = length(mom.height)
     v = 1.0
     vsquare = v^2
-    equi_dist = dist64_1d(zeros(Float64, len), zeros(Float64, len), zeros(Float64, len))
-    for i in 1:len
-        equi_dist.f0[i] = (mom.height[i] 
-                        - 1/(2*vsquare) * gravity * mom.height[i]^2 
-                        - 1/vsquare * mom.height[i] * mom.velocity[i]^2)
-        equi_dist.f1[i] = (1/(4*vsquare) * gravity * mom.height[i]^2 
-                        + 1/(2*v) * mom.height[i] * mom.velocity[i] 
-                        + 1/(2*vsquare) * mom.height[i] * mom.velocity[i]^2)
-        equi_dist.f2[i] = (1/(4*vsquare) * gravity * mom.height[i]^2 
-                        - 1/(2*v) * mom.height[i] * mom.velocity[i] 
-                        + 1/(2*vsquare) * mom.height[i] * mom.velocity[i]^2)
-    end
+    equi_dist = JuSwalbe.DistributionD1Q3(zeros(T, len), zeros(T, len), zeros(T, len))
+    equi_dist.f0 = (mom.height .- 1/(2*vsquare) * gravity .* mom.height.^2 
+                    .- 1/vsquare .* mom.height .* mom.velocity.^2)
+    equi_dist.f1 = (1/(4*vsquare) * gravity .* mom.height.^2 
+                    .+ 1/(2*v) .* mom.height .* mom.velocity 
+                    .+ 1/(2*vsquare) .* mom.height .* mom.velocity.^2)
+    equi_dist.f2 = (1/(4*vsquare) * gravity .* mom.height.^2 
+                    .- 1/(2*v) .* mom.height .* mom.velocity 
+                    .+ 1/(2*vsquare) .* mom.height .* mom.velocity.^2)
+        
     return equi_dist
 end
 
-function calc_equilibrium_distribution(mom::macroquant32_1d, gravity=0)
-    len = length(mom.height)
-    v = 1.0
-    vsquare = v^2
-    equi_dist = dist32_1d(zeros(Float32, len), zeros(Float32, len), zeros(Float32, len))
-
-    for i in 1:len
-        equi_dist.f0[i] = (mom.height[i] - 1/(2*vsquare) * gravity * mom.height[i]^2 
-                        - 1/vsquare * mom.height[i] * mom.velocity[i]^2)
-        equi_dist.f1[i] = (1/(4*vsquare) * gravity * mom.height[i]^2 
-                        + 1/(2*v) * mom.height[i] * mom.velocity[i] 
-                        + 1/(2*vsquare) * mom.height[i] * mom.velocity[i]^2)
-        equi_dist.f2[i] = (1/(4*vsquare) * gravity * mom.height[i]^2 
-                        - 1/(2*v) * mom.height[i] * mom.velocity[i] 
-                        + 1/(2*vsquare) * mom.height[i] * mom.velocity[i]^2)
-    end
-    return equi_dist
-end
-
-function calc_equilibrium_distribution(mom::macroquant64_2d, gravity=0)
+function calc_equilibrium_distribution(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}; gravity::T=T(0)) where {T<:Number}
     # In two dimensions there is a little more work needed
     width = size(mom.height,1)
     thick = size(mom.height,2)
@@ -84,7 +63,16 @@ function calc_equilibrium_distribution(mom::macroquant64_2d, gravity=0)
     v = 1.0
     vsquare = v^2
     # Standard D2Q9 weights and lattice velocities
-    weights = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36]
+    # For type security, otherwise weights will always be Float64
+    if T != Float64
+        weights = Array{T, 1}(undef, 9)
+        w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36]
+        for (ind, ele) in enumerate(weights)
+            weights[ind] = w[ind]
+        end
+    else
+        weights = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36]
+    end
     lattice_vel = [0 0; 1 0; 0 1; -1 0; 0 -1; 1 1; -1 1; -1 -1; 1 -1]
     # I use dicts as they are easier to iterate over
     weightsdict = Dict()
@@ -96,15 +84,15 @@ function calc_equilibrium_distribution(mom::macroquant64_2d, gravity=0)
     # f0 has a special formular to be calculated
     relevantkeys = [:f1, :f2, :f3, :f4, :f5, :f6, :f7, :f8]
     # Initialize a dummy distribution
-    equi_dist = dist64_2d(zeros(Float64,(width, thick)), 
-                          zeros(Float64,(width, thick)), 
-                          zeros(Float64,(width, thick)),
-                          zeros(Float64,(width, thick)),
-                          zeros(Float64,(width, thick)),
-                          zeros(Float64,(width, thick)),
-                          zeros(Float64,(width, thick)),
-                          zeros(Float64,(width, thick)),
-                          zeros(Float64,(width, thick)))
+    equi_dist = JuSwalbe.DistributionD2Q9(zeros(T,(width, thick)), 
+                                          zeros(T,(width, thick)), 
+                                          zeros(T,(width, thick)),
+                                          zeros(T,(width, thick)),
+                                          zeros(T,(width, thick)),
+                                          zeros(T,(width, thick)),
+                                          zeros(T,(width, thick)),
+                                          zeros(T,(width, thick)),
+                                          zeros(T,(width, thick)))
     # Calculate the velocity squared
     udotu = velocitysquared(mom)
     # Again make use dicts for iteration purpose
@@ -120,26 +108,28 @@ function calc_equilibrium_distribution(mom::macroquant64_2d, gravity=0)
                                                           .- 3.0/2.0 * udotu)
     end
     # Save them to the distrubtion type which was created earlier
-    equi_dist = dist64_2d(equidict[:f0],
-                          equidict[:f1],
-                          equidict[:f2],
-                          equidict[:f3],
-                          equidict[:f4],
-                          equidict[:f5],
-                          equidict[:f6],
-                          equidict[:f7],
-                          equidict[:f8])
+    equi_dist = JuSwalbe.DistributionD2Q9(equidict[:f0],
+                                          equidict[:f1],
+                                          equidict[:f2],
+                                          equidict[:f3],
+                                          equidict[:f4],
+                                          equidict[:f5],
+                                          equidict[:f6],
+                                          equidict[:f7],
+                                          equidict[:f8])
 
     # And return it :)
     return equi_dist
 end
 
 """
-    velocitysquared(mom::macroquant64_2d)
+    velocitysquared(mom::Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}})
 
 Computes the square of the velocity vector (ux, uy) at every lattice point.
 
-The magnitude of the velocity is needed to calculate the equilibrium distribution.
+The magnitude of the velocity is needed to calculate the equilibrium distribution in the dimensional case.
+In the one dimensional case the velocity is just a vector and therefore has no `.x` and `.y` component.
+See also [`calc_equilibrium_distribution`](@ref)
 
 # Math
 The velocity squared ``u^2(x,y)`` is computed according to 
@@ -152,8 +142,11 @@ With lower case `x` and `y` the respective component of the velocity vector is a
 ```jldoctest
 julia> using JuSwalbe
 
-julia> moment = JuSwalbe.macroquant64_2d(ones(4,4), JuSwalbe.velocity64_2d(fill(0.1, (4,4)),fill(0.2, (4,4))), zeros(4,4))
-JuSwalbe.macroquant64_2d([1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0], JuSwalbe.velocity64_2d([0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1], [0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2]), [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0])
+julia> velocities = JuSwalbe.Twovector{Matrix{Float64}}(fill(0.1, (4,4)),fill(0.2, (4,4)))
+JuSwalbe.Twovector{Array{Float64,2}}([0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1], [0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2])
+
+julia> moment = JuSwalbe.Macroquant{Matrix{Float64},JuSwalbe.Twovector{Matrix{Float64}}}(ones(Float64, (4,4)), velocities, ones(Float64, (4,4)), ones(Float64, (4,4)))
+JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}([1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0], JuSwalbe.Twovector{Array{Float64,2}}([0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1], [0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2]), [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0], [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0])
 
 julia> moment.velocity.x
 4×4 Array{Float64,2}:
@@ -170,8 +163,8 @@ julia> JuSwalbe.velocitysquared(moment)
  0.05  0.05  0.05  0.05
 ```
 """
-function velocitysquared(mom::macroquant64_2d)
-    velsquared = mom.velocity.x.^2 + mom.velocity.y.^2
+function velocitysquared(mom::Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}) where {T<:Number}
+    velsquared = mom.velocity.x.^2 .+ mom.velocity.y.^2
     return velsquared
 end
 

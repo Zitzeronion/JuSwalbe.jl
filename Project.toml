@@ -16,8 +16,13 @@ Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
-Expectations = "1.4"
-julia = "1.4"
+DocumenterTools = "^0.1"
+Expectations = "^1.4"
+DrWatson = "^1.10"
+Documenter = "^0.24"
+Images = "^0.22"
+JSON = "^0.21"
+julia = "^1.4"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
