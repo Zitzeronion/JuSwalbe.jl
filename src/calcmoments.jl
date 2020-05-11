@@ -188,6 +188,9 @@ function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:
     return result
 end
 
+"""
+
+"""
 function dist2array(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:Number}
     # Get the size to allocate memory
     width, thick = size(dist.f0)

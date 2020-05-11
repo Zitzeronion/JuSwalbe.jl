@@ -16,6 +16,6 @@ export call, readinput
 # Pressure related 
 export Δh, Π, pressure  
 # Distributions functions and moments
-export calc_equilibrium_distribution, calculatemoments
+export calc_equilibrium_distribution, calculatemoments, dist2array
 
 end # module
