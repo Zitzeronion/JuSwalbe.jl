@@ -9,10 +9,13 @@ include("distribution_types.jl")
 include("readinput.jl")
 include("equilibriumcalculation.jl")
 include("calculatepressure.jl")
+include("calcmoments.jl")
 
 # IO related
-export call, readinput, calc_equilibrium_distribution
+export call, readinput
 # Pressure related 
 export Δh, Π, pressure  
+# Distributions functions and moments
+export calc_equilibrium_distribution, calculatemoments
 
 end # module

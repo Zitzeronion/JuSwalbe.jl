@@ -107,7 +107,7 @@ For the exact derivation take a look at the references, in principle it is the d
 
 `` \\Phi'(h) = \\Pi(h) `` 
 
-`` \\Pi(h) = \\kappa f(h) = (1-\\cos(\\theta))\\frac{(n-1)(m-1)}{(n-m)h_{\\ast}}\\Bigg[\\Bigg(\frac{h_{\\ast}}{h}\\Bigg)^n - \\Bigg(\frac{h_{\\ast}}{h}\\Bigg)^m\\Bigg] ``
+`` \\Pi(h) = \\kappa f(h) = (1-\\cos\\theta)\\frac{(n-1)(m-1)}{(n-m)h_{\\ast}}\\Bigg[\\Bigg(\\frac{h_{\\ast}}{h}\\Bigg)^n - \\Bigg(\\frac{h_{\\ast}}{h}\\Bigg)^m\\Bigg] ``
 
 `` \\Pi(h_{\\ast}) = 0 `` 
 

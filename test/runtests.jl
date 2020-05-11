@@ -8,4 +8,5 @@ using Test, DrWatson, DelimitedFiles, Images
     include("readinput.jl")
     include("equilibriumcalculation.jl")
     include("calculatepressure.jl")
+    include("calcmoments.jl")
 end
