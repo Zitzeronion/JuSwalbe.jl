@@ -114,7 +114,130 @@ Of course this vector `` \\nabla p `` needs to be multiple with the height field
 Where the step size is limited by the resolution of the lattice Boltzmann grid `` \\Delta x ``.
 
 # Example
+## Two spatial dimensions
+```jldoctest
+julia> using JuSwalbe
 
+julia> zerovelocity = JuSwalbe.Twovector(x=zeros(5,5), y=zeros(5,5)) # Thanks to @with_kw macro
+JuSwalbe.Twovector{Array{Float64,2}}
+  x: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  y: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+
+julia> mom = JuSwalbe.Macroquant(height=fill(1.0, (5,5)), velocity=zerovelocity, pressure=zerovelocity.x, energy=zerovelocity.y)
+JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
+  height: Array{Float64}((5, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  velocity: JuSwalbe.Twovector{Array{Float64,2}}
+  pressure: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  energy: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+
+julia> mom.height[2,3] = 2.0; mom.height[3,2] = 2.0; mom.height[4,3] = 2.0; mom.height[3,4] = 2.0
+2.0
+
+julia> p = pressure(mom)
+5×5 Array{Float64,2}:
+ -1.6082e-5   -0.00168275  -0.00668275  -0.00168275  -1.6082e-5
+ -0.00168275  -0.0133494    0.029998    -0.0133494   -0.00168275
+ -0.00668275   0.029998    -0.0266827    0.029998    -0.00668275
+ -0.00168275  -0.0133494    0.029998    -0.0133494   -0.00168275
+ -1.6082e-5   -0.00168275  -0.00668275  -0.00168275  -1.6082e-5
+
+julia> mom.pressure
+5×5 Array{Float64,2}:
+ -1.6082e-5   -0.00168275  -0.00668275  -0.00168275  -1.6082e-5
+ -0.00168275  -0.0133494    0.029998    -0.0133494   -0.00168275
+ -0.00668275   0.029998    -0.0266827    0.029998    -0.00668275
+ -0.00168275  -0.0133494    0.029998    -0.0133494   -0.00168275
+ -1.6082e-5   -0.00168275  -0.00668275  -0.00168275  -1.6082e-5
+
+julia> f = JuSwalbe.Forces(slip=zerovelocity, h∇p=zerovelocity, thermal=zerovelocity, bathymetry=zerovelocity)
+JuSwalbe.Forces{JuSwalbe.Twovector{Array{Float64,2}}}
+  slip: JuSwalbe.Twovector{Array{Float64,2}}
+  h∇p: JuSwalbe.Twovector{Array{Float64,2}}
+  bathymetry: JuSwalbe.Twovector{Array{Float64,2}}
+  thermal: JuSwalbe.Twovector{Array{Float64,2}}
+
+julia> gradp = ∇p(mom, f)
+5×5×2 Array{Float64,3}:
+[:, :, 1] =
+ -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
+ -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
+  0.0           0.0          0.0          0.0          0.0
+  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
+  0.00166667    0.00097105  -0.0102825    0.00097105   0.00166667
+
+[:, :, 2] =
+ -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
+ -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
+  0.0102825   -0.00277309   0.0   0.00277309   -0.0102825
+ -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
+ -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
+
+julia> f.h∇p.x
+5×5 Array{Float64,2}:
+ -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
+ -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
+  0.0           0.0          0.0          0.0          0.0
+  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
+  0.00166667    0.00097105  -0.0102825    0.00097105   0.00166667
+
+julia> f.h∇p.y
+5×5 Array{Float64,2}:
+ -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
+ -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
+  0.0102825   -0.00277309   0.0   0.00277309   -0.0102825
+ -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
+ -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
+ 
+```
+
+## One spatial dimension
+```jldoctest
+julia> using JuSwalbe
+
+julia> mom = JuSwalbe.Macroquant(height=ones(10), velocity=zeros(10), pressure=zeros(10), energy=zeros(10))
+JuSwalbe.Macroquant{Array{Float64,1},Array{Float64,1}}
+  height: Array{Float64}((10,)) [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+  velocity: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  pressure: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  energy: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+julia> f = JuSwalbe.Forces(slip=zeros(10), h∇p=zeros(10), thermal=zeros(10), bathymetry=zeros(10))
+JuSwalbe.Forces{Array{Float64,1}}
+  slip: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  h∇p: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  bathymetry: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  thermal: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+julia> mom.height[4] = 0.5; mom.height[5] = 2.0; mom.height[6] = 0.5; 
+
+julia> p = pressure(mom, θ=zeros(1), γ=1.0)
+10-element Array{Float64,1}:
+ -0.0
+ -0.0
+  0.5
+ -2.0
+  3.0
+ -2.0
+  0.5
+ -0.0
+ -0.0
+ -0.0
+
+julia> gradp = ∇p(mom, f)
+10-element Array{Float64,1}:
+ -0.041666666666666664
+  0.5
+ -1.5833333333333333
+  0.9166666666666666
+  0.0
+ -0.9166666666666666
+  1.5833333333333333
+ -0.5
+  0.041666666666666664
+  0.0
+  
+
+```
 
 # References
 ## Two spatial dimensions
@@ -132,44 +255,48 @@ function ∇p(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, force::JuSwalbe.For
     # A (deep) copy of the pressure field
     p = deepcopy(mom.pressure)
     len = length(p)
-    ∇pout = zeros(T, len)
+    gradp = zeros(T, len)
     # Periodic extension of pressure, for higher order differential
-    pushfirst!(p, lastindex(p))
-    pushfirst!(p, p[len])
+    pushfirst!(p, p[len]) # Add last element on first spot
+    pushfirst!(p, p[len]) # Add second last element on first spot
     push!(p, p[3])
     push!(p, p[4])
+    ∇pout = zeros(T, length(p))
     # Five point first derivative
-    for i in 3:len+3
-        ∇pout[i] = T(1.0/12.0) * (p[i+2] + 8*p[i+1] - 8*p[i-1] - p[i+2])
+    for i in 3:len+2
+        ∇pout[i] = T(1.0/12.0) * (p[i-2] + 8*p[i+1] - 8*p[i-1] - p[i+2])
     end
+    gradp = ∇pout[3:len+2]
     # Write force to force struct
-    force.h∇p = mom.height .* ∇pout
+    force.h∇p = mom.height .* gradp
     # Return result
-    return  mom.height .* ∇pout
+    return  mom.height .* gradp
 end
 
-function ∇p(mom::JuSwalbe.Macroquant{Matrix{T},Twovector{Matrix{T}}}, force::JuSwalbe.Twovector{Matrix{T}}) where {T<:Number}
+function ∇p(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalbe.Twovector{Matrix{T}}}, force::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}) where {T<:Number}
     # A (deep) copy of the pressure field
     p = deepcopy(mom.pressure)
     width, thick = size(p)
     ∇poutx = zeros(T, (width, thick))
     ∇pouty = zeros(T, (width, thick))
+    output = zeros(T, (width, thick, 2))
     # Periodic extension of pressure, for higher order differential
     wrapper = 1
-    padarray(p, Pad(:circular, wrapper, wrapper))
+    pperiodic = padarray(p, Pad(:circular, wrapper, wrapper))
     # Five point first derivative
-    for i in 1:width, j in 1:thick
-        ∇poutx[i,j] = T(3.0) * (T(1.0/9.0) * (p[i+1,j] - p[i-1,j])
-                             + T(1.0/36.0) * (p[i+1,j+1] - p[i-1,j+1] - p[i-1,j-1] + p[i+1,j-1]))
-        ∇pouty[i,j] = T(3.0) * (T(1.0/9.0) * (p[i,j+1] - p[i,j+1] )
-                              + T(1.0/36.0) * (p[i+1,j+1] + p[i-1,j+1] - p[i-1,j-1] - p[i+1,j-1]))
+    @inbounds for j in 1:thick, i in 1:width
+        ∇poutx[i,j] = T(3.0) * (T(1.0/9.0) * (pperiodic[i+1,j] - pperiodic[i-1,j])
+                              + T(1.0/36.0) * (pperiodic[i+1,j+1] - pperiodic[i-1,j+1] - pperiodic[i-1,j-1] + pperiodic[i+1,j-1]))
+        ∇pouty[i,j] = T(3.0) * (T(1.0/9.0) * (pperiodic[i,j+1] - pperiodic[i,j-1] )
+                              + T(1.0/36.0) * (pperiodic[i+1,j+1] + pperiodic[i-1,j+1] - pperiodic[i-1,j-1] - pperiodic[i+1,j-1]))
     end
 
     # Write force to force struct
-    force.h∇p = JuSwalbe.Towvector(mom.height .* ∇poutx, mom.height .* ∇pouty)
-
+    force.h∇p = JuSwalbe.Twovector(mom.height .* ∇poutx, mom.height .* ∇pouty)
+    output[:, :, 1] = mom.height .* ∇poutx
+    output[:, :, 2] = mom.height .* ∇pouty
     # Return result
-    return  mom.height .* ∇poutx, mom.height .* ∇pouty 
+    return  output
 end
 
 """
