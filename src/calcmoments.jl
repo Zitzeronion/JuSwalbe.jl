@@ -162,6 +162,32 @@ function calculatemoments(dist::JuSwalbe.DistributionD1Q3{Vector{T}}) where {T<:
     return result
 end
 
+function calculatemoments(dist::JuSwalbe.DistributionD1Q3{Vector{T}}, force::JuSwalbe.Forces{Vector{T}}) where {T<:Number}
+    # Get a size for the output arrays
+    len = length(dist.f0)
+    # Allocate the output
+    height = zeros(T, len)
+    velocity = zeros(T, len)
+    pressure = zeros(T, len)
+    energy = zeros(T, len)
+    # Lattice velocities
+    c = [0 1 -1]
+    csquare = [0 1 1]
+    # Store all distributions in an array
+    distarray = hcat(dist.f0, dist.f1, dist.f2)
+    # Store forces in array 
+    forcearray = hcat(force.slip, force.thermal, force.∇p)
+    # Moment summation is acutally performed here
+    height = sum(distarray, dims=2)[:, 1] 
+    velocity = sum(distarray .* c, dims=2)[:, 1] + T(0.5) * sum(forcearray, dims=2)[:, 1]
+    energy = sum(distarray .* csquare, dims=2)[:, 1]
+    # Last step is to divide the velocity by h
+    velocity ./= height
+    # Return the output
+    result = JuSwalbe.Macroquant(height, velocity, pressure, energy)
+    return result
+end
+
 function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:Number}
     # Get a size for the output arrays
     width, thick = size(dist.f0)
@@ -176,6 +202,35 @@ function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:
     indices = [Symbol("f$(i-1)") for i in 1:9]
     # Store all distributions in an array
     distarray = dist2array(dist)
+    # The moments are just a summation of distribution functions
+    height = sum(distarray, dims=1)[1, :, :]
+    velocityx = sum(distarray .* lattice_vel[:, 1], dims=1)[1, :, :]
+    velocityy = sum(distarray .* lattice_vel[:, 2], dims=1)[1, :, :]
+    
+    velocityx ./= height
+    velocityy ./= height
+
+    velocity = JuSwalbe.Twovector(velocityx, velocityy)
+
+    result = JuSwalbe.Macroquant(height, velocity, pressure, energy)
+    return result
+end
+
+function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}, force::JuSwalbe.Forces{Matrix{T}}) where {T<:Number}
+    # Get a size for the output arrays
+    width, thick = size(dist.f0)
+    # Allocate the output
+    height = zeros(T, (width,thick))
+    velocityx = zeros(T, (width,thick))
+    velocityy = zeros(T, (width,thick))
+    pressure = zeros(T, (width,thick))
+    energy = zeros(T, (width,thick))
+    # Lattice velocities
+    lattice_vel = [0.0 0.0; 1.0 0.0; 0.0 1.0; -1.0 0.0; 0.0 -1.0; 1.0 1.0; -1.0 1.0; -1.0 -1.0; 1.0 -1.0]
+    indices = [Symbol("f$(i-1)") for i in 1:9]
+    # Store all distributions in an array
+    distarray = dist2array(dist)
+    forcearray = dist2array(force)
     # The moments are just a summation of distribution functions
     height = sum(distarray, dims=1)[1, :, :]
     velocityx = sum(distarray .* lattice_vel[:, 1], dims=1)[1, :, :]
@@ -291,4 +346,17 @@ function dist2array(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:Number
         distarray[i, :, :] = getfield(dist, j)
     end
     return distarray
+end
+
+function dist2array(force::JuSwalbe.Forces{Matrix{T}}) where {T<:Number}
+    # Get the size to allocate memory
+    width, thick = size(force.slip)
+    # Symbols to access the fields: :f0, :f1, :f2 ...
+    indices = [:slip :∇p :bathymetry :thermal]
+    # Allocate the output array
+    forcearray = Array{T, 3}(undef, (width,thick,4))
+    for (i, j) in enumerate(indices)
+        forcearray[:, :, i] = getfield(force, j)
+    end
+    return forcearray
 end

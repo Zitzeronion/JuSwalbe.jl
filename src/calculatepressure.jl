@@ -53,6 +53,8 @@ function pressure(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{
     p = zeros(T, size(mom.height))
     # All calculation needed here
     p = -γ * Δh(mom) .+ Π(mom, γ=γ, θ=θ)
+    # Write the solution into the struct as well
+    mom.pressure = p
 
     return p
 end
@@ -71,6 +73,8 @@ function pressure(mom::JuSwalbe.Macroquant{Vector{T}, Vector{T}}; γ::T=T(0.01),
     p = zeros(T, length(mom.height))
     # All calculation needed here
     p = -γ * Δh(mom) .+ Π(mom, γ=γ, θ=θ)
+    # Write the solution into the struct as well
+    mom.pressure = p
 
     return p
 end
@@ -82,6 +86,90 @@ function pressure(height::Array{T,1}; γ::T=0.01, θ::Vector{T}=ones(T,1)*T(1/9)
     p = -γ * Δh(height) .+ Π(height, γ=γ, θ=θ)
 
     return p
+end
+
+"""
+    ∇p(mom::JuSwalbe.Macroquant)
+
+Computation of the pressure gradient in one and two spatial dimensions.
+
+Given a struct `Macroquant` with an `.pressure` entry performs a finite difference approximation of the spatial derivative.
+A five-point stencil is used for one spatial dimension.
+For two spatial dimensions a weighted nine-point stencil is applied.
+An perodicity around the edges is assumed (ring, torus).
+
+# Math
+Since this is essentially discrete operators I will not go into details.
+## Two spatial dimensions
+
+`` \\nabla p = 3 \\sum_{i=0}^8 w_i \\mathbf{c}_i p(\\mathbf{r}+\\mathbf{c}_i) +O(\\nabla^3). ``
+
+Where `` \\mathbf{c}_i, w_i `` are the standard D2Q9 lattice velocities and weights.
+Of course this vector `` \\nabla p `` needs to be multiple with the height field to yield the correct force.
+
+## One spatial dimension
+
+`` \\partial_x p = \\frac{p(x-2\\Delta x) - 8p(x-1\\Delta x) + 0p(x) + 8p(x+1\\Delta x) - p(x+2\\Delta x)}{12\\Delta x} + O(\\partial_x^5). ``
+
+Where the step size is limited by the resolution of the lattice Boltzmann grid `` \\Delta x ``.
+
+# Example
+
+
+# References
+## Two spatial dimensions
+- [Isotropic discrete Laplacian operators from lattice hydrodynamics](https://www.sciencedirect.com/science/article/pii/S0021999112004226)
+- [Discretizations for the Incompressible Navier--Stokes Equations Based on the Lattice Boltzmann Method](https://epubs.siam.org/doi/abs/10.1137/S1064827599357188)
+
+The second reference is the older and more mathematically one, while the first reference is short and great for a fast look up.
+
+## One spatial dimension
+- [Numerical Differentiation](http://www2.math.umd.edu/~dlevy/classes/amsc466/lecture-notes/differentiation-chap.pdf)
+
+Any lecture notes or book on discrete mathematics should do for the one dimensional case.
+"""
+function ∇p(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, force::JuSwalbe.Forces{Vector{T}}) where {T<:Number}
+    # A (deep) copy of the pressure field
+    p = deepcopy(mom.pressure)
+    len = length(p)
+    ∇pout = zeros(T, len)
+    # Periodic extension of pressure, for higher order differential
+    pushfirst!(p, lastindex(p))
+    pushfirst!(p, p[len])
+    push!(p, p[3])
+    push!(p, p[4])
+    # Five point first derivative
+    for i in 3:len+3
+        ∇pout[i] = T(1.0/12.0) * (p[i+2] + 8*p[i+1] - 8*p[i-1] - p[i+2])
+    end
+    # Write force to force struct
+    force.h∇p = mom.height .* ∇pout
+    # Return result
+    return  mom.height .* ∇pout
+end
+
+function ∇p(mom::JuSwalbe.Macroquant{Matrix{T},Twovector{Matrix{T}}}, force::JuSwalbe.Twovector{Matrix{T}}) where {T<:Number}
+    # A (deep) copy of the pressure field
+    p = deepcopy(mom.pressure)
+    width, thick = size(p)
+    ∇poutx = zeros(T, (width, thick))
+    ∇pouty = zeros(T, (width, thick))
+    # Periodic extension of pressure, for higher order differential
+    wrapper = 1
+    padarray(p, Pad(:circular, wrapper, wrapper))
+    # Five point first derivative
+    for i in 1:width, j in 1:thick
+        ∇poutx[i,j] = T(3.0) * (T(1.0/9.0) * (p[i+1,j] - p[i-1,j])
+                             + T(1.0/36.0) * (p[i+1,j+1] - p[i-1,j+1] - p[i-1,j-1] + p[i+1,j-1]))
+        ∇pouty[i,j] = T(3.0) * (T(1.0/9.0) * (p[i,j+1] - p[i,j+1] )
+                              + T(1.0/36.0) * (p[i+1,j+1] + p[i-1,j+1] - p[i-1,j-1] - p[i+1,j-1]))
+    end
+
+    # Write force to force struct
+    force.h∇p = JuSwalbe.Towvector(mom.height .* ∇poutx, mom.height .* ∇pouty)
+
+    # Return result
+    return  mom.height .* ∇poutx, mom.height .* ∇pouty 
 end
 
 """

@@ -1,7 +1,7 @@
 module JuSwalbe
 
 using Pkg
-using DelimitedFiles, JSON, DrWatson, Images
+using DelimitedFiles, JSON, DrWatson, Images, Parameters
 
 include("call.jl")
 include("macroscopic_typs.jl")
@@ -14,7 +14,7 @@ include("calcmoments.jl")
 # IO related
 export call, readinput
 # Pressure related 
-export Δh, Π, pressure  
+export Δh, Π, pressure, ∇p
 # Distributions functions and moments
 export calc_equilibrium_distribution, calculatemoments, dist2array
 
