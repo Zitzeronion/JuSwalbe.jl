@@ -308,4 +308,70 @@
             end
         end
     end
+    
+    @testset "Pressure gradient h∇p two dimensions" begin
+        N, M = (5,5)
+        typelist = [Float16 Float32 Float64]
+        for type in typelist
+            testheight = ones(type, (N,M)) .* reshape(collect(1:N*M),N,M)
+            testvel = JuSwalbe.Twovector(zeros(type, (N,M)), zeros(type, (N,M)))
+            moment = JuSwalbe.Macroquant(height=testheight, velocity=testvel, pressure=testvel.x, energy=testvel.x)
+            testforce = JuSwalbe.Forces(slip=testvel, thermal=testvel, h∇p=testvel, bathymetry=testvel)
+            @test isa(testforce, JuSwalbe.Forces)
+            @test isa(moment, JuSwalbe.Macroquant)
+            testgrad = ∇p(moment, testforce)
+            @test isa(testforce.h∇p, JuSwalbe.Twovector)
+            @test size(testforce.h∇p.x) == (N,M)
+            @test size(testforce.h∇p.y) == (N,M)
+            for i in 1:N, j in 1:M
+                @test testforce.h∇p.x[i,j] ≈ type(0.0) atol=tolerances[type]
+                @test testforce.h∇p.y[i,j] ≈ type(0.0) atol=tolerances[type]
+            end
+           
+            moment.pressure[3,3] = type(1.0)
+            testgrad = ∇p(moment, testforce)
+            # Upper row
+            @test testforce.h∇p.x[2,2] - moment.height[2,2]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p.x[2,3] - moment.height[2,3]*type(1/3) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p.x[2,4] - moment.height[2,4]*type(1/12) ≈ type(0) atol=tolerances[type]
+            # Lower row
+            @test testforce.h∇p.x[4,2] + moment.height[4,2]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p.x[4,3] + moment.height[4,3]*type(1/3) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p.x[4,4] + moment.height[4,4]*type(1/12) ≈ type(0) atol=tolerances[type]
+            # Left column
+            @test testforce.h∇p.y[2,2] - moment.height[2,2]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p.y[3,2] - moment.height[3,2]*type(1/3) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p.y[4,2] - moment.height[4,2]*type(1/12) ≈ type(0) atol=tolerances[type]
+            # Right column
+            @test testforce.h∇p.y[2,4] + moment.height[2,4]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p.y[3,4] + moment.height[3,4]*type(1/3) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p.y[4,4] + moment.height[4,4]*type(1/12) ≈ type(0) atol=tolerances[type]
+        end
+    end
+    @testset "Pressure gradient h∇p one dimension" begin
+        N = 5
+        typelist = [Float16 Float32 Float64]
+        for type in typelist
+            testheight = ones(type, N) .* collect(1:N)
+            moment = JuSwalbe.Macroquant(height=testheight, velocity=testheight, pressure=testheight, energy=testheight)
+            testforce = JuSwalbe.Forces(slip=testheight, thermal=testheight, h∇p=zeros(type,N), bathymetry=testheight)
+            @test isa(testforce, JuSwalbe.Forces)
+            @test isa(moment, JuSwalbe.Macroquant)
+            testgrad = ∇p(moment, testforce)
+            @test isa(testforce.h∇p, Array{type, 1})
+            @test length(testforce.h∇p) == N
+            
+            moment.pressure = zeros(type, 5)
+            moment.pressure[3] = type(1.0)
+            testforce.h∇p = zeros(type, 5)
+            testgrad = ∇p(moment, testforce)
+            # Upper row
+            @test testforce.h∇p[1] + moment.height[1]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p[2] - moment.height[2]*type(2/3) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p[3] + moment.height[3]*type(0) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p[4] + moment.height[4]*type(2/3) ≈ type(0) atol=tolerances[type]
+            @test testforce.h∇p[5] - moment.height[5]*type(1/12) ≈ type(0) atol=tolerances[type]
+            
+        end
+    end
 end
