@@ -1,6 +1,27 @@
 @testset "Moment calculation" begin
     tolerances = Dict(Float16 => 1e-3, Float32 => 1e-5, Float64 => 1e-7, Real => 1e-7)
     @testset "D2Q9" begin
+        @testset "With Guo Forcing but no forces" begin
+            typelist = [Float16 Float32 Float64]
+            for type in typelist
+                testarray1 = fill(type(0.1), (5,5))
+                testarray2 = fill(type(0.2), (5,5))
+                testdist = JuSwalbe.DistributionD2Q9(f0=testarray1, f1=testarray2, f2=testarray1, f3=testarray1, f4=testarray1, f5=testarray1, f6=testarray1, f7=testarray1, f8=testarray1)
+                @test isa(testdist, JuSwalbe.DistributionD2Q9)
+                zerovec = JuSwalbe.Twovector(x=zeros(type, (5,5)), y=zeros(type, (5,5)))
+                testforce = JuSwalbe.Forces(slip=zerovec, thermal=zerovec, h∇p=zerovec, bathymetry=zerovec)
+                mom = calculatemoments(testdist, testforce)
+                @test isa(mom, JuSwalbe.Macroquant)
+                @test size(mom.height) == (5,5)
+                @test size(mom.velocity.x) == (5,5)
+                @test size(mom.velocity.y) == (5,5)
+                for i in 1:5, j in 1:5
+                    @test (mom.height[i,j] - type(1.0)) ≈ type(0.0) atol = tolerances[type] 
+                    @test (mom.velocity.x[i,j] - type(0.1/1.0)) ≈ type(0.0) atol = tolerances[type]
+                    @test (mom.velocity.y[i,j] - type(0.0/1.0)) ≈ type(0.0) atol = tolerances[type]  
+                end
+            end
+        end
         @testset "With velocity in ux" begin
             typelist = [Float16 Float32 Float64]
             for type in typelist

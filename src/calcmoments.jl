@@ -216,7 +216,7 @@ function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:
     return result
 end
 
-function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}, force::JuSwalbe.Forces{Matrix{T}}) where {T<:Number}
+function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}, force::JuSwalbe.Forces{Twovector{Matrix{T}}}) where {T<:Number}
     # Get a size for the output arrays
     width, thick = size(dist.f0)
     # Allocate the output
@@ -230,11 +230,11 @@ function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}, force::JuS
     indices = [Symbol("f$(i-1)") for i in 1:9]
     # Store all distributions in an array
     distarray = dist2array(dist)
-    forcearray = dist2array(force)
+    forcearrayx, forcearrayy = dist2array(force)
     # The moments are just a summation of distribution functions
     height = sum(distarray, dims=1)[1, :, :]
-    velocityx = sum(distarray .* lattice_vel[:, 1], dims=1)[1, :, :]
-    velocityy = sum(distarray .* lattice_vel[:, 2], dims=1)[1, :, :]
+    velocityx = sum(distarray .* lattice_vel[:, 1], dims=1)[1, :, :] + T(0.5) * sum(forcearrayx, dims=3)[:, :, 1]
+    velocityy = sum(distarray .* lattice_vel[:, 2], dims=1)[1, :, :] + T(0.5) * sum(forcearrayy, dims=3)[:, :, 1]
     
     velocityx ./= height
     velocityy ./= height
@@ -348,15 +348,17 @@ function dist2array(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:Number
     return distarray
 end
 
-function dist2array(force::JuSwalbe.Forces{Matrix{T}}) where {T<:Number}
+function dist2array(force::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}) where {T<:Number}
     # Get the size to allocate memory
-    width, thick = size(force.slip)
-    # Symbols to access the fields: :f0, :f1, :f2 ...
-    indices = [:slip :∇p :bathymetry :thermal]
+    width, thick = size(force.slip.x)
+    # Symbols to access the fields:
+    indices = [:slip :h∇p :bathymetry :thermal]
     # Allocate the output array
-    forcearray = Array{T, 3}(undef, (width,thick,4))
+    forcearrayx = Array{T, 3}(undef, (width,thick,4))
+    forcearrayy = Array{T, 3}(undef, (width,thick,4))
     for (i, j) in enumerate(indices)
-        forcearray[:, :, i] = getfield(force, j)
+        forcearrayx[:, :, i] = getfield(getfield(force, j),:x)
+        forcearrayy[:, :, i] = getfield(getfield(force, j),:y)
     end
-    return forcearray
+    return forcearrayx,forcearrayy
 end
