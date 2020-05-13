@@ -25,7 +25,7 @@ Such the equations look a little more complex
 
 ``f_i^{eq} = w_i h(\\frac{3}{2}gh + 3 \\mathbf{c}_i\\cdot\\mathbf{u} + \\frac{9}{2}(\\mathbf{c}_i\\cdot\\mathbf{u})^2 - \\frac{3}{2}u^2))``
 
-with i are the number of lattice speeds and w_i and c_i are the weights and sets of lattice velocities. 
+with i are the number of lattice speeds and w_i and c_i are the weights and sets of lattice velocities.
 
 # Example
 ## Two spatial dimensions
@@ -113,7 +113,7 @@ julia> using JuSwalbe
 julia> mom = JuSwalbe.Macroquant(height=ones(5), velocity=fill(0.1, 5), pressure=zeros(5), energy=zeros(5))
 JuSwalbe.Macroquant{Array{Float64,1},Array{Float64,1}}
   height: Array{Float64}((5,)) [1.0, 1.0, 1.0, 1.0, 1.0]
-  velocity: Array{Float64}((10,)) [0.1, 0.1, 0.1, 0.1, 0.1]
+  velocity: Array{Float64}((5,)) [0.1, 0.1, 0.1, 0.1, 0.1]
   pressure: Array{Float64}((5,)) [0.0, 0.0, 0.0, 0.0, 0.0]
   energy: Array{Float64}((5,)) [0.0, 0.0, 0.0, 0.0, 0.0]
 
@@ -123,7 +123,7 @@ JuSwalbe.DistributionD1Q3{Array{Float64,1}}
   f1: Array{Float64}((5,)) [0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001]
   f2: Array{Float64}((5,)) [-0.045, -0.045, -0.045, -0.045, -0.045]
 
-julia h = sum(hcat(equilibrium.f0, equilibrium.f1, equilibrium.f2), dims=2)[:,1]
+julia> h = sum(hcat(equilibrium.f0, equilibrium.f1, equilibrium.f2), dims=2)[:,1]
 5-element Array{Float64,1}:
  0.9999999999999999
  0.9999999999999999
@@ -137,6 +137,9 @@ julia> h[1] - 1.0 # fits up to machine precision
 ```
 
 # References
+## Code
+See also: [`velocitysquared`](@ref)
+
 ## One spatial dimension
 There are plenty of ways to calculate them I mainly the ones derived in Eq.(13) of [Study of the 1D lattice Boltzmann shallow water equation and its coupling to build a canal network.](https://www.sciencedirect.com/science/article/pii/S0021999110003372)
 
@@ -233,11 +236,17 @@ With lower case `x` and `y` the respective component of the velocity vector is a
 ```jldoctest
 julia> using JuSwalbe
 
-julia> velocities = JuSwalbe.Twovector{Matrix{Float64}}(fill(0.1, (4,4)),fill(0.2, (4,4)))
-JuSwalbe.Twovector{Array{Float64,2}}([0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1], [0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2])
+julia> velocities = JuSwalbe.Twovector{Matrix{Float64}}(x=fill(0.1, (4,4)), y=fill(0.2, (4,4)))
+JuSwalbe.Twovector{Array{Float64,2}}
+  x: Array{Float64}((4, 4)) [0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1]
+  y: Array{Float64}((4, 4)) [0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2]
 
-julia> moment = JuSwalbe.Macroquant{Matrix{Float64},JuSwalbe.Twovector{Matrix{Float64}}}(ones(Float64, (4,4)), velocities, ones(Float64, (4,4)), ones(Float64, (4,4)))
-JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}([1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0], JuSwalbe.Twovector{Array{Float64,2}}([0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1; 0.1 0.1 0.1 0.1], [0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2; 0.2 0.2 0.2 0.2]), [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0], [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0])
+julia> moment = JuSwalbe.Macroquant(height=ones(Float64, (4,4)), velocity=velocities, pressure=ones(Float64, (4,4)), energy=ones(Float64, (4,4)))
+JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
+  height: Array{Float64}((4, 4)) [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0]
+  velocity: JuSwalbe.Twovector{Array{Float64,2}}
+  pressure: Array{Float64}((4, 4)) [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0]
+  energy: Array{Float64}((4, 4)) [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0]
 
 julia> moment.velocity.x
 4×4 Array{Float64,2}:

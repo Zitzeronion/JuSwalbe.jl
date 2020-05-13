@@ -101,6 +101,25 @@
     end
 
     @testset "D1Q3" begin
+        @testset "With Guo Forcing but no forces" begin
+            typelist = [Float16 Float32 Float64]
+            for type in typelist
+                testarray1 = fill(type(0.1), 10)
+                testarray2 = fill(type(0.2), 10)
+                testdist = JuSwalbe.DistributionD1Q3(f0=testarray1, f1=testarray2, f2=testarray1)
+                @test isa(testdist, JuSwalbe.DistributionD1Q3)
+                zerovec = zeros(type, 10)
+                testforce = JuSwalbe.Forces(slip=zerovec, thermal=zerovec, h∇p=zerovec, bathymetry=zerovec)
+                mom = calculatemoments(testdist, testforce)
+                @test isa(mom, JuSwalbe.Macroquant)
+                @test length(mom.height) == 10
+                @test length(mom.velocity) == 10
+                for i in 1:5
+                    @test (mom.height[i] - type(0.4)) ≈ type(0.0) atol = tolerances[type] 
+                    @test (mom.velocity[i] - type(0.1/0.4)) ≈ type(0.0) atol = tolerances[type]  
+                end
+            end
+        end
         @testset "With velocity" begin
             typelist = [Float16 Float32 Float64]
             for type in typelist
@@ -150,6 +169,26 @@
             for i in 1:5, j in 1:5
                 @test testarray1[i,j] == arr[1,i,j]
                 @test testarray2[i,j] == arr[3,i,j]
+            end
+        end
+    end
+    @testset "Force to Array" begin
+        typelist = [Float16 Float32 Float64]
+        for type in typelist
+            testarray1 = JuSwalbe.Twovector(x=fill(type(0.1), (5,5)), y=fill(type(0.1), (5,5)))
+            testarray2 = JuSwalbe.Twovector(x=fill(type(0.2), (5,5)), y=fill(type(0.2), (5,5)))
+            testforce = JuSwalbe.Forces(slip=testarray1, thermal=testarray1, h∇p=testarray2, bathymetry=testarray1)
+            @test isa(testforce, JuSwalbe.Forces)
+            arrx, arry = dist2array(testforce)
+            @test isa(arrx, Array{type, 3})
+            @test isa(arry, Array{type, 3})
+            @test size(arrx) == (5,5,4)
+            @test size(arry) == (5,5,4)
+            for i in 1:5, j in 1:5
+                @test testarray1.x[i,j] == arrx[i,j,1]
+                @test testarray1.y[i,j] == arry[i,j,1]
+                @test testarray2.x[i,j] == arrx[i,j,2]
+                @test testarray2.y[i,j] == arry[i,j,2]
             end
         end
     end
