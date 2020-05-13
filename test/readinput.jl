@@ -5,6 +5,7 @@
     @test testinput.ly == 5
     @test testinput.maxruntime == 1000
     @test testinput.dumping == 100
+    @test testinput.tau == 1.0
     @test testinput.gravity == 0.0
     @test testinput.γ == 0.01
     @test testinput.δ == 1.0

@@ -29,14 +29,16 @@ julia> new_input.γ
 0.01
 ```
 """
-struct inputconstants <: inputfile
-    lx::Int32
-    ly::Int32
-    maxruntime::Int64
-    dumping::Int32
-    gravity::Float64
-    γ::Float64
-    δ::Float64
+@with_kw struct Inputconstants <: inputfile
+    lx::Int32 = 512
+    ly::Int32 = 512
+    maxruntime::Int64 =100000
+    dumping::Int32 = 1000
+    tau::Float64 = 1.0
+    gravity::Float64 = 0.0
+    γ::Float64 = 0.01
+    δ::Float64 = 1.0
+    μ::Float64 = 1/3*()
 end
 
 """
@@ -92,20 +94,24 @@ function readinput(file)
                 "Lattice_points_y", 
                 "Max_run_time", 
                 "Output_dump", 
+                "Relaxation_rate"
                 "gravity", 
                 "surface_tension", 
-                "slippage"]
+                "slippage",
+                "viscosity"]
 
     for arg in arguments
         push!(values, findfirst(x -> x == arg, vec(input))) 
     end
-    runtimeconstants = inputconstants(input[values[1], 2], 
+    runtimeconstants = Inputconstants(input[values[1], 2], 
                                       input[values[2], 2], 
                                       input[values[3], 2],
                                       input[values[4], 2],
                                       input[values[5], 2],
                                       input[values[6], 2],
-                                      input[values[7], 2])
+                                      input[values[7], 2],
+                                      input[values[8], 2],
+                                      )
     
     return runtimeconstants
 end
