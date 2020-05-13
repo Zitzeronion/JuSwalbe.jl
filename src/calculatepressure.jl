@@ -35,6 +35,34 @@ julia> p = pressure(height)
  -0.160001  -4.68862e-8  -1.20826e-8  0.16
  -0.12       0.04         0.04        0.2
 
+julia> mom = JuSwalbe.Macroquant(height=height, velocity=JuSwalbe.Twovector(x=zeros(4,4), y=zeros(4,4)), pressure=zeros(4,4), energy=zeros(4,4))
+JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
+  height: Array{Float64}((4, 4)) [1.0 5.0 9.0 13.0; 2.0 6.0 10.0 14.0; 3.0 7.0 11.0 15.0; 4.0 8.0 12.0 16.0]
+  velocity: JuSwalbe.Twovector{Array{Float64,2}}
+  pressure: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
+  energy: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
+
+julia> mom.pressure
+4×4 Array{Float64,2}:
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+
+julia> pressure(mom) # Pressure is stored in the moments struct!
+4×4 Array{Float64,2}:
+ -0.200016  -0.0400001   -0.04        0.12
+ -0.160002  -7.44536e-8  -1.6082e-8   0.16
+ -0.160001  -4.68862e-8  -1.20826e-8  0.16
+ -0.12       0.04         0.04        0.2
+
+julia> mom.pressure
+4×4 Array{Float64,2}:
+ -0.200016  -0.0400001   -0.04        0.12
+ -0.160002  -7.44536e-8  -1.6082e-8   0.16
+ -0.160001  -4.68862e-8  -1.20826e-8  0.16
+ -0.12       0.04         0.04        0.2
+
 ```
 So what does this mean?
 A positive pressure is force that drives the film down in height.
@@ -333,8 +361,12 @@ julia> using JuSwalbe
 julia> n,m = (4,4)
 (4, 4)
 
-julia> moment = JuSwalbe.Macroquant{Matrix{Float64}, JuSwalbe.Twovector{Matrix{Float64}}}(ones(n,m), JuSwalbe.Twovector(zeros(n,m),zeros(n,m)), zeros(n,m),zeros(n,m))
-JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}([1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0], JuSwalbe.Twovector{Array{Float64,2}}([0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0], [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]), [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0], [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0])
+julia> moment = JuSwalbe.Macroquant(height=ones(n,m), velocity=JuSwalbe.Twovector(x=zeros(n,m), y=zeros(n,m)), pressure=zeros(n,m), energy=zeros(n,m))
+JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
+  height: Array{Float64}((4, 4)) [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0]
+  velocity: JuSwalbe.Twovector{Array{Float64,2}}
+  pressure: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
+  energy: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
 
 julia> p = Π(moment)
 4×4 Array{Float64,2}:
@@ -350,7 +382,7 @@ julia> p = Π(moment, θ=zeros(1,1)) # Fully wetting substrate
  -0.0  -0.0  -0.0  -0.0
  -0.0  -0.0  -0.0  -0.0
 
-julia> h = reshape([i for i in 1.0:1.0:(n*m)],n,m)
+julia> h = reshape([i for i in 1.0:(n*m)],n,m)
 4×4 Array{Float64,2}:
  1.0  5.0   9.0  13.0
  2.0  6.0  10.0  14.0
@@ -482,11 +514,19 @@ julia> vely = zeros(Float64, (4,4))
  0.0  0.0  0.0  0.0
  0.0  0.0  0.0  0.0
  
-julia> vel = JuSwalbe.Twovector(velx, vely)
-JuSwalbe.Twovector{Array{Float64,2}}([0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0], [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0])
+julia> vel = JuSwalbe.Twovector(x=velx, y=vely)
+JuSwalbe.Twovector{Array{Float64,2}}
+  x: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
+  y: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
 
-julia> moment = JuSwalbe.Macroquant(height, vel, zeros(4,4), zeros(4,4))
-JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}([1.0 5.0 9.0 13.0; 2.0 6.0 10.0 14.0; 3.0 7.0 11.0 15.0; 4.0 8.0 12.0 16.0], JuSwalbe.Twovector{Array{Float64,2}}([0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0], [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]), [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0], [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0])
+
+julia> moment = JuSwalbe.Macroquant(height=height, velocity=vel, pressure=zeros(4,4), energy=zeros(4,4))
+JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
+  height: Array{Float64}((4, 4)) [1.0 5.0 9.0 13.0; 2.0 6.0 10.0 14.0; 3.0 7.0 11.0 15.0; 4.0 8.0 12.0 16.0]
+  velocity: JuSwalbe.Twovector{Array{Float64,2}}
+  pressure: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
+  energy: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
+
 
 julia> moment.height
 4×4 Array{Float64,2}:
@@ -550,6 +590,7 @@ Many of them are good, although definitly not the best I go here with:
 
 ## One spatial dimension
 Almost any reference on discrete differentiation is good enough.
+- [Numerical Differentiation](http://www2.math.umd.edu/~dlevy/classes/amsc466/lecture-notes/differentiation-chap.pdf)
 
 """
 function Δh(mom::JuSwalbe.Macroquant{Matrix{T}, Twovector{Matrix{T}}}) where {T<:Number}

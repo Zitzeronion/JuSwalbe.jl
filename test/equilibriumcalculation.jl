@@ -198,7 +198,7 @@ tolerances = Dict(Float16 => 1e-3, Float32 => 1e-5, Float64 => 1e-7, Real => 1e-
                 # Check if the values are actually consistent
                 if key == :f0
                     for value in test_dict[key]
-                        @test value ≈ type(1 - 1/3) atol = 1e-3
+                        @test value - type(1 - 1/12) ≈ type(0.0) atol = tolerances[type]
                     end
                 else
                     for value in test_dict[key]
@@ -246,7 +246,7 @@ tolerances = Dict(Float16 => 1e-3, Float32 => 1e-5, Float64 => 1e-7, Real => 1e-
                 # Check if the values are actually consistent
                 if key == :f0
                     for value in test_dict[key]
-                        @test value ≈ type(1 - 3/10) atol=1e-3
+                        @test value - type(1 - 7/60) ≈ type(0) atol=tolerances[type]
                     end
                 else
                     for value in test_dict[key]
@@ -296,7 +296,7 @@ tolerances = Dict(Float16 => 1e-3, Float32 => 1e-5, Float64 => 1e-7, Real => 1e-
                 # Check if the values are actually consistent
                 if key == :f0
                     for value in test_dict[key]
-                        @test value ≈ type(1 + 1.0/30.0) atol=1e-3
+                        @test value - type(1 - 1.0/30.0) ≈ type(0.0) atol=tolerances[type]
                     end
                 else
                     for value in test_dict[key]
