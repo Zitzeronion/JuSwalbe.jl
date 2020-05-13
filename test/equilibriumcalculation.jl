@@ -1,4 +1,5 @@
 @testset "Equilibria" begin
+tolerances = Dict(Float16 => 1e-3, Float32 => 1e-5, Float64 => 1e-7, Real => 1e-7)
     @testset "One dimension -velocity -gravity" begin
         N = 10
         # Generate test moments and a test distribution
@@ -77,15 +78,15 @@
                 # Check if the values are actually consistent
                 if key == :f0
                     for value in test_dict[key]
-                        @test value == type(1 - 1.0/20.0 - 0.01)
+                        @test value - type(1 - 1.0/20.0 - 0.01) ≈ type(0.0) atol=tolerances[type]
                     end
                 elseif key == :f1
                     for value in test_dict[key]
-                        @test value ≈ type(1.0/40.0 + 1.0/20.0 + 1.0/200.0) atol=1e-3
+                        @test value - type(1.0/40.0 + 1.0/20.0 + 1.0/200.0) ≈ type(0.0) atol=tolerances[type]
                     end
                 elseif key == :f2
                     for value in test_dict[key]
-                        @test value ≈ type(1.0/40.0 - 1.0/20.0 + 1.0/200.0) atol=1e-3
+                        @test value - type(1.0/40.0 - 1.0/20.0 + 1.0/200.0) ≈ type(0.0) atol=tolerances[type]
                     end
                 end
             end
@@ -135,8 +136,8 @@
         for type in typelist
             testvelocity_x = zeros(type, (N,M))
             testvelocity_y = zeros(type, (N,M))
-            test_vel = JuSwalbe.Twovector(testvelocity_x, testvelocity_y) 
-            testmoments = JuSwalbe.Macroquant(ones(type,(N,M)), test_vel,zeros(type,(N,M)), zeros(type,(N,M)))
+            test_vel = JuSwalbe.Twovector(x=testvelocity_x, y=testvelocity_y) 
+            testmoments = JuSwalbe.Macroquant(height=ones(type,(N,M)), velocity=test_vel, pressure=zeros(type,(N,M)), energy=zeros(type,(N,M)))
             equilibria = calc_equilibrium_distribution(testmoments, gravity=type(0.0))
             # Push them in a dictonary to easily loop through the keys (fields)
             test_dict = struct2dict(equilibria)

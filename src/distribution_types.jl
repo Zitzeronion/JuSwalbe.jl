@@ -1,12 +1,12 @@
 abstract type Distributionfunction end
 
-mutable struct DistributionD1Q3{T} <: Distributionfunction
+@with_kw mutable struct DistributionD1Q3{T} <: Distributionfunction
     f0::T
     f1::T
     f2::T
 end
 
-mutable struct DistributionD2Q9{T} <: Distributionfunction
+@with_kw mutable struct DistributionD2Q9{T} <: Distributionfunction
     f0::T
     f1::T
     f2::T

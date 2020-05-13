@@ -28,7 +28,77 @@ Such the equations look a little more complex
 with i are the number of lattice speeds and w_i and c_i are the weights and sets of lattice velocities. 
 
 # Example
-TBD
+## Two spatial dimensions
+```jldoctest
+julia> using JuSwalbe
+
+julia> mom = JuSwalbe.Macroquant(height=ones(4,4), velocity=JuSwalbe.Twovector(x=fill(0.1, (4,4)), y=fill(-0.1, (4,4))), pressure=zeros(4,4), energy=zeros(4,4))
+JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
+  height: Array{Float64}((4, 4)) [1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0; 1.0 1.0 1.0 1.0]
+  velocity: JuSwalbe.Twovector{Array{Float64,2}}
+  pressure: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
+  energy: Array{Float64}((4, 4)) [0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
+
+julia> equilibrium = calc_equilibrium_distribution(mom)
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+  f0: Array{Float64}((4, 4)) [1.0133333333333334 1.0133333333333334 1.0133333333333334 1.0133333333333334; 1.0133333333333334 1.0133333333333334 1.0133333333333334 1.0133333333333334; 1.0133333333333334 1.0133333333333334 1.0133333333333334 1.0133333333333334; 1.0133333333333334 1.0133333333333334 1.0133333333333334 1.0133333333333334]
+  f1: Array{Float64}((4, 4)) [0.035 0.035 0.035 0.035; 0.035 0.035 0.035 0.035; 0.035 0.035 0.035 0.035; 0.035 0.035 0.035 0.035]
+  f2: Array{Float64}((4, 4)) [-0.03166666666666667 -0.03166666666666667 -0.03166666666666667 -0.03166666666666667; -0.03166666666666667 -0.03166666666666667 -0.03166666666666667 -0.03166666666666667; -0.03166666666666667 -0.03166666666666667 -0.03166666666666667 -0.03166666666666667; -0.03166666666666667 -0.03166666666666667 -0.03166666666666667 -0.03166666666666667]
+  f3: Array{Float64}((4, 4)) [-0.03166666666666667 -0.03166666666666667 -0.03166666666666667 -0.03166666666666667; -0.03166666666666667 -0.03166666666666667 -0.03166666666666667 -0.03166666666666667; -0.03166666666666667 -0.03166666666666667 -0.03166666666666667 -0.03166666666666667; -0.03166666666666667 -0.03166666666666667 -0.03166666666666667 -0.03166666666666667]
+  f4: Array{Float64}((4, 4)) [0.035 0.035 0.035 0.035; 0.035 0.035 0.035 0.035; 0.035 0.035 0.035 0.035; 0.035 0.035 0.035 0.035]
+  f5: Array{Float64}((4, 4)) [-0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335; -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335; -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335; -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335]
+  f6: Array{Float64}((4, 4)) [-0.0125 -0.0125 -0.0125 -0.0125; -0.0125 -0.0125 -0.0125 -0.0125; -0.0125 -0.0125 -0.0125 -0.0125; -0.0125 -0.0125 -0.0125 -0.0125]
+  f7: Array{Float64}((4, 4)) [-0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335; -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335; -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335; -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335 -0.0008333333333333335]
+  f8: Array{Float64}((4, 4)) [0.020833333333333336 0.020833333333333336 0.020833333333333336 0.020833333333333336; 0.020833333333333336 0.020833333333333336 0.020833333333333336 0.020833333333333336; 0.020833333333333336 0.020833333333333336 0.020833333333333336 0.020833333333333336; 0.020833333333333336 0.020833333333333336 0.020833333333333336 0.020833333333333336]
+
+julia> arr = dist2array(equilibrium)
+9×4×4 Array{Float64,3}:
+[:, :, 1] =
+  1.01333       1.01333       1.01333       1.01333
+  0.035         0.035         0.035         0.035
+ -0.0316667    -0.0316667    -0.0316667    -0.0316667
+ -0.0316667    -0.0316667    -0.0316667    -0.0316667
+  0.035         0.035         0.035         0.035
+ -0.000833333  -0.000833333  -0.000833333  -0.000833333
+ -0.0125       -0.0125       -0.0125       -0.0125
+ -0.000833333  -0.000833333  -0.000833333  -0.000833333
+  0.0208333     0.0208333     0.0208333     0.0208333
+
+[:, :, 2] =
+  1.01333       1.01333       1.01333       1.01333
+  0.035         0.035         0.035         0.035
+ -0.0316667    -0.0316667    -0.0316667    -0.0316667
+ -0.0316667    -0.0316667    -0.0316667    -0.0316667
+  0.035         0.035         0.035         0.035
+ -0.000833333  -0.000833333  -0.000833333  -0.000833333
+ -0.0125       -0.0125       -0.0125       -0.0125
+ -0.000833333  -0.000833333  -0.000833333  -0.000833333
+  0.0208333     0.0208333     0.0208333     0.0208333
+
+[:, :, 3] =
+  1.01333       1.01333       1.01333       1.01333
+  0.035         0.035         0.035         0.035
+ -0.0316667    -0.0316667    -0.0316667    -0.0316667
+ -0.0316667    -0.0316667    -0.0316667    -0.0316667
+  0.035         0.035         0.035         0.035
+ -0.000833333  -0.000833333  -0.000833333  -0.000833333
+ -0.0125       -0.0125       -0.0125       -0.0125
+ -0.000833333  -0.000833333  -0.000833333  -0.000833333
+  0.0208333     0.0208333     0.0208333     0.0208333
+
+[:, :, 4] =
+  1.01333       1.01333       1.01333       1.01333
+  0.035         0.035         0.035         0.035
+ -0.0316667    -0.0316667    -0.0316667    -0.0316667
+ -0.0316667    -0.0316667    -0.0316667    -0.0316667
+  0.035         0.035         0.035         0.035
+ -0.000833333  -0.000833333  -0.000833333  -0.000833333
+ -0.0125       -0.0125       -0.0125       -0.0125
+ -0.000833333  -0.000833333  -0.000833333  -0.000833333
+  0.0208333     0.0208333     0.0208333     0.0208333
+
+julia> h = sum(arr, dims=1)[1,:,:] 
+```
 
 # References
 ## One spatial dimension
@@ -40,9 +110,9 @@ Originally these equilibria have been worked out by Paul Salmon.
 """
 function calc_equilibrium_distribution(mom::JuSwalbe.Macroquant{Vector{T}, Vector{T}}; gravity::T=T(0)) where {T<:Number}
     len = length(mom.height)
-    v = 1.0
+    v = T(1.0)
     vsquare = v^2
-    equi_dist = JuSwalbe.DistributionD1Q3(zeros(T, len), zeros(T, len), zeros(T, len))
+    equi_dist = JuSwalbe.DistributionD1Q3(f0=zeros(T, len), f1=zeros(T, len), f2=zeros(T, len))
     equi_dist.f0 = (mom.height .- 1/(2*vsquare) * gravity .* mom.height.^2 
                     .- 1/vsquare .* mom.height .* mom.velocity.^2)
     equi_dist.f1 = (1/(4*vsquare) * gravity .* mom.height.^2 
@@ -64,59 +134,44 @@ function calc_equilibrium_distribution(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwa
     vsquare = v^2
     # Standard D2Q9 weights and lattice velocities
     # For type security, otherwise weights will always be Float64
-    if T != Float64
-        weights = Array{T, 1}(undef, 9)
-        w = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36]
-        for (ind, ele) in enumerate(weights)
-            weights[ind] = w[ind]
-        end
-    else
-        weights = [4/9, 1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36]
-    end
+    weights = [T(4/9), T(1/9), T(1/9), T(1/9), T(1/9), T(1/36), T(1/36), T(1/36), T(1/36)]
+    
     lattice_vel = [0 0; 1 0; 0 1; -1 0; 0 -1; 1 1; -1 1; -1 -1; 1 -1]
-    # I use dicts as they are easier to iterate over
-    weightsdict = Dict()
-    latticeveldict = Dict()
-    for (dist, weight) in enumerate(weights)
-        weightsdict[Symbol("f$(dist-1)")] = weight
-        latticeveldict[Symbol("f$(dist-1)")]=lattice_vel[dist,:]
-    end
-    # f0 has a special formular to be calculated
-    relevantkeys = [:f1, :f2, :f3, :f4, :f5, :f6, :f7, :f8]
+    
     # Initialize a dummy distribution
-    equi_dist = JuSwalbe.DistributionD2Q9(zeros(T,(width, thick)), 
-                                          zeros(T,(width, thick)), 
-                                          zeros(T,(width, thick)),
-                                          zeros(T,(width, thick)),
-                                          zeros(T,(width, thick)),
-                                          zeros(T,(width, thick)),
-                                          zeros(T,(width, thick)),
-                                          zeros(T,(width, thick)),
-                                          zeros(T,(width, thick)))
+    equi_dist = JuSwalbe.DistributionD2Q9(f0=zeros(T,(width, thick)), 
+                                          f1=zeros(T,(width, thick)), 
+                                          f2=zeros(T,(width, thick)),
+                                          f3=zeros(T,(width, thick)),
+                                          f4=zeros(T,(width, thick)),
+                                          f5=zeros(T,(width, thick)),
+                                          f6=zeros(T,(width, thick)),
+                                          f7=zeros(T,(width, thick)),
+                                          f8=zeros(T,(width, thick)))
     # Calculate the velocity squared
     udotu = velocitysquared(mom)
     # Again make use dicts for iteration purpose
-    equidict = struct2dict(equi_dist)
+    equiarray = dist2array(equi_dist)
     # Calculate f0
-    equidict[:f0] = mom.height .- weights[1] * mom.height .*(15.0/2.0 * gravity * mom.height .- 3.0/2.0 * udotu)
+    equiarray[1, :, :] = mom.height .+ weights[1] * mom.height .*(T(-15.0/2.0) * gravity * mom.height .- T(3.0/2.0) * udotu)
     # And the other 8 distribtuion functions
-    for key in relevantkeys
-        latticeveldotu = mom.velocity.x * latticeveldict[key][1] .+ mom.velocity.y * latticeveldict[key][2]
-        equidict[key] = weightsdict[key] * mom.height .* (3.0/2.0 * gravity * mom.height
-                                                          .+ 3 * latticeveldotu 
-                                                          .+ 9.0/2.0 * latticeveldotu.^2 
-                                                          .- 3.0/2.0 * udotu)
+    for i in 2:9
+        latticeveldotu = mom.velocity.x * lattice_vel[i,1] .+ mom.velocity.y * lattice_vel[i,2]
+        equiarray[i, :, :] = weights[i] * mom.height .* (T(3.0/2.0) * gravity * mom.height
+                                                          .+ T(3) * latticeveldotu 
+                                                          .+ T(9.0/2.0) * latticeveldotu.^2 
+                                                          .- T(3.0/2.0) * udotu)
     end
     # Save them to the distrubtion type which was created earlier
-    equi_dist = JuSwalbe.DistributionD2Q9(equidict[:f0],
-                                          equidict[:f1],
-                                          equidict[:f2],
-                                          equidict[:f3],
-                                          equidict[:f4],
-                                          equidict[:f5],
-                                          equidict[:f6],
-                                          equidict[:f7],
-                                          equidict[:f8])
+    equi_dist = JuSwalbe.DistributionD2Q9(f0=equiarray[1, :, :],
+                                          f1=equiarray[2, :, :],
+                                          f2=equiarray[3, :, :],
+                                          f3=equiarray[4, :, :],
+                                          f4=equiarray[5, :, :],
+                                          f5=equiarray[6, :, :],
+                                          f6=equiarray[7, :, :],
+                                          f7=equiarray[8, :, :],
+                                          f8=equiarray[9, :, :])
 
     # And return it :)
     return equi_dist
