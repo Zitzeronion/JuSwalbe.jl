@@ -38,7 +38,7 @@ julia> new_input.γ
     gravity::Float64 = 0.0
     γ::Float64 = 0.01
     δ::Float64 = 1.0
-    μ::Float64 = 1/3*()
+    μ::Float64 = 1/3*(2-tau)/2*tau
 end
 
 """
