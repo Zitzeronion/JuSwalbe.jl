@@ -9,4 +9,5 @@ using Test, DrWatson, DelimitedFiles, Images
     include("equilibriumcalculation.jl")
     include("calculatepressure.jl")
     include("calcmoments.jl")
+    include("forcing.jl")
 end

@@ -6,7 +6,7 @@ Abstract type for all kinds of input files
 abstract type inputfile end
 
 """
-    inputconstants = new(lx, ly, maxruntime, dumping, gravity, γ, δ)
+    Inputconstants = new(lx, ly, maxruntime, dumping, gravity, γ, δ)
 
 Struct containing input parameters.
 
@@ -22,21 +22,35 @@ Having no gravity and a surface tension of 0.01 and a slip length of 1.
 ```jldoctest firsttest
 julia> using JuSwalbe
 
-julia> new_input = JuSwalbe.inputconstants(20, 20, 100, 10, 0.0, 0.01, 1.0)
-JuSwalbe.inputconstants(20, 20, 100, 10, 0.0, 0.01, 1.0)
+julia> new_input = JuSwalbe.Inputconstants()
+JuSwalbe.Inputconstants
+  lx: Int64 512
+  ly: Int64 512
+  maxruntime: Int64 100000
+  dumping: Int64 1000
+  τ: Float64 1.0
+  gravity: Float64 0.0
+  γ: Float64 0.01
+  δ: Float64 1.0
+  μ: Float64 0.16666666666666666
 
 julia> new_input.γ
 0.01
 ```
+
+# References
+See also: [`readinput`](@ref), [`findargument`](@ref), [`computeslip`](@ref)
 """
-struct inputconstants <: inputfile
-    lx::Int32
-    ly::Int32
-    maxruntime::Int64
-    dumping::Int32
-    gravity::Float64
-    γ::Float64
-    δ::Float64
+@with_kw struct Inputconstants <: inputfile
+    lx = 512
+    ly = 512
+    maxruntime = 100000
+    dumping = 1000
+    τ = 1.0
+    gravity = 0.0
+    γ = 0.01
+    δ = 1.0
+    μ = 1 / 3 * (2 - τ) / 2 * τ
 end
 
 """
@@ -44,19 +58,20 @@ end
 
 Reads input parameters from a `file`.
 
-The expected amount of parameters can be addressed with [`inputconstants`](@ref).
+The expected amount of parameters can be addressed with [`Inputconstants`](@ref).
 For now it expects seven values for different runtime constants.
 
 # Example
 ```jldoctest secondtest
 julia> using JuSwalbe, DelimitedFiles
 
-julia> args = ["Lattice_points_x" 10; "Lattice_points_y" 5; "Max_run_time" 1000; "Output_dump" 100; "gravity" 0.0; "surface_tension" 0.01; "slippage" 1.0] # Generate a text file with input
-7×2 Array{Any,2}:
+julia> args = ["Lattice_points_x" 10; "Lattice_points_y" 5; "Max_run_time" 1000; "Output_dump" 100; "Relaxation_rate" 1.0; "gravity" 0.0; "surface_tension" 0.01; "slippage" 1.0] # Generate a text file with input
+8×2 Array{Any,2}:
  "Lattice_points_x"    10
  "Lattice_points_y"     5
  "Max_run_time"      1000
  "Output_dump"        100
+ "Relaxation_rate"      1.0
  "gravity"              0.0
  "surface_tension"      0.01
  "slippage"             1.0
@@ -64,7 +79,16 @@ julia> args = ["Lattice_points_x" 10; "Lattice_points_y" 5; "Max_run_time" 1000;
 julia> writedlm("test.txt", args)
 
 julia> test = readinput("test.txt")
-JuSwalbe.inputconstants(10, 5, 1000, 100, 0.0, 0.01, 1.0)
+JuSwalbe.Inputconstants
+  lx: Int64 10
+  ly: Int64 5
+  maxruntime: Int64 1000
+  dumping: Int64 100
+  τ: Float64 1.0
+  gravity: Float64 0.0
+  γ: Float64 0.01
+  δ: Float64 1.0
+  μ: Float64 0.16666666666666666
 
 julia> test.lx
 10
@@ -92,20 +116,58 @@ function readinput(file)
                 "Lattice_points_y", 
                 "Max_run_time", 
                 "Output_dump", 
+                "Relaxation_rate",
                 "gravity", 
                 "surface_tension", 
-                "slippage"]
+                "slippage",
+                "viscosity"]
 
-    for arg in arguments
-        push!(values, findfirst(x -> x == arg, vec(input))) 
+    for i in arguments
+        push!(values, findfirst(x -> x == i, vec(input)))
     end
-    runtimeconstants = inputconstants(input[values[1], 2], 
-                                      input[values[2], 2], 
-                                      input[values[3], 2],
-                                      input[values[4], 2],
-                                      input[values[5], 2],
-                                      input[values[6], 2],
-                                      input[values[7], 2])
+    
+    lx = findargument(input, "Lattice_points_x")
+    ly = findargument(input, "Lattice_points_y")
+    maxruntime = findargument(input, "Max_run_time")
+    dumping = findargument(input, "Output_dump")
+    τ = findargument(input, "Relaxation_rate")
+    gravity = findargument(input, "gravity")
+    γ = findargument(input, "surface_tension")
+    δ = findargument(input, "slippage")
+
+    runtimeconstants = Inputconstants(lx=lx, ly=ly, maxruntime=maxruntime, dumping=dumping, τ=τ, gravity=gravity, γ=γ, δ=δ)
     
     return runtimeconstants
+end
+
+"""
+    findargument(arr, str)
+
+Searches for a numerical value based on a str input and returns the value.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> arr = ["hmm" 1; "yeah" 0.01; "world" 1090]
+3×2 Array{Any,2}:
+ "hmm"       1
+ "yeah"      0.01
+ "world"  1090
+
+julia> world = findargument(arr, "world")
+1090
+
+```
+
+# References
+See also: [`readinput`](@ref)
+"""
+function findargument(arr::Array{Any,2}, argument::String)
+    for (i,arg) in enumerate(arr[:,1])
+        if arr[i,1] == argument
+            value = arr[i,2]
+            return value
+        end
+    end
 end
