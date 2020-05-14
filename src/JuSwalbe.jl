@@ -10,7 +10,7 @@ include("readinput.jl")
 include("equilibriumcalculation.jl")
 include("calculatepressure.jl")
 include("calcmoments.jl")
-include("slippage.jl")
+include("Forcing.jl")
 
 # IO related
 export call, readinput
