@@ -20,7 +20,7 @@ With the boundary conditions
 The parameter `δ` allows to push the zero velocity into the substrate, such below te computable region.
 Solving this equation with some more assumptions yields
 
-`` \\mathbf{F}_{slip} = \\mu\\alpha_{\\delta}(h) \\mathbf{u} = \\frac{6\\mu h \mathbf{u}}{2 h^2 + 6\\delta h + 3\\delta^2}. ``
+`` \\mathbf{F}_{slip} = \\mu\\alpha_{\\delta}(h) \\mathbf{u} = \\frac{6\\mu h \\mathbf{u}}{2 h^2 + 6\\delta h + 3\\delta^2}. ``
 
 # Example 
 
@@ -28,7 +28,8 @@ Solving this equation with some more assumptions yields
 Here I shamelessly cite the paper from within our group 
 - [Lattice Boltzmann method for thin-liquid-film hydrodynamics](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.100.033313)
 
-See also:[`Inputconstants`](@ref), [`calculatemoments`](@ref)
+See also: [`Inputconstants`](@ref), [`calculatemoments`](@ref)
+
 """
 function computeslip(mom::JuSwalbe.Macroquant{Vector{T}, Vector{T}}, forces::JuSwalbe.Forces{Vector{T}}, input::JuSwalbe.Inputconstants) where {T<:Number}
     # Measure the length and allocate a dummy array

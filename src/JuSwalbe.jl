@@ -13,7 +13,7 @@ include("calcmoments.jl")
 include("forcing.jl")
 
 # IO related
-export call, readinput, Inputconstants
+export call, readinput
 # Pressure related 
 export Δh, Π, pressure, ∇p
 # Distributions functions and moments
