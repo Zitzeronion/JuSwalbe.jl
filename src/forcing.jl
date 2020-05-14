@@ -35,22 +35,32 @@ function computeslip(mom::JuSwalbe.Macroquant{Vector{T}, Vector{T}}, forces::JuS
     # Measure the length and allocate a dummy array
     len = length(mom.height)
     slippage = zeros(T, len)
+    num = zeros(T, len)
+    denom = zeros(T, len)
     # Slippage can be calculated assuming a parabolic velocity profile in z
-    slippage = input.μ * (6 * mom.height .* mom.velocity ./ (2 * mom.height.^2 .+ 6 * input.δ * mom.height .+ 6 * input.δ^2))
+    num = 6 .* mom.height .* mom.velocity
+    denom = 2 .* mom.height .+ 6 * mom.height * input.δ .+ 3 * input.δ^2
+    slippage = input.μ * (num ./ denom)
     # Write the result into the forcing array
     forces.slip = slippage
     # Write it out as well
     return slippage
 end
 
-function computeslip(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}, forces::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}, δ::T=T(1.0), μ::T=T(1/6)) where {T<:Number}
+function computeslip(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}, forces::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}, input::JuSwalbe.Inputconstants) where {T<:Number}
     # Measure the length and allocate a dummy array
     width, thick = size(mom.height)
     slippagex = zeros(T, (width, thick))
     slippagey = zeros(T, (width, thick))
+    numx = zeros(T, (width, thick))
+    numy = zeros(T, (width, thick))
+    denom = zeros(T, (width, thick))
     # Slippage can be calculated assuming a parabolic velocity profile in z
-    slippagex = μ * (6 * mom.height .* mom.velocity.x ./ (2 * mom.height.^2 .+ 6 * δ * mom.height .+ 6 * δ^2))
-    slippagey = μ * (6 * mom.height .* mom.velocity.x ./ (2 * mom.height.^2 .+ 6 * δ * mom.height .+ 6 * δ^2))
+    numx = 6 .* mom.height .* mom.velocity.x
+    numy = 6 .* mom.height .* mom.velocity.y
+    denom = 2 .* mom.height .+ 6 * mom.height * input.δ .+ 3 * input.δ^2
+    slippagex = input.μ * ( numx ./ denom )
+    slippagey = input.μ * ( numy ./ denom )
     # Write the result into the forcing array
     slippage = JuSwalbe.Twovector(x=slippagex, y=slippagey)
     forces.slip = slippage

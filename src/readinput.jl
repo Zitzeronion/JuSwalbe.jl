@@ -6,7 +6,7 @@ Abstract type for all kinds of input files
 abstract type inputfile end
 
 """
-    inputconstants = new(lx, ly, maxruntime, dumping, gravity, γ, δ)
+    Inputconstants = new(lx, ly, maxruntime, dumping, gravity, γ, δ)
 
 Struct containing input parameters.
 
@@ -24,10 +24,10 @@ julia> using JuSwalbe
 
 julia> new_input = JuSwalbe.Inputconstants()
 JuSwalbe.Inputconstants
-  lx: Int32 512
-  ly: Int32 512
+  lx: Int64 512
+  ly: Int64 512
   maxruntime: Int64 100000
-  dumping: Int32 1000
+  dumping: Int64 1000
   τ: Float64 1.0
   gravity: Float64 0.0
   γ: Float64 0.01
@@ -42,15 +42,15 @@ julia> new_input.γ
 See also: [`readinput`](@ref), [`findargument`](@ref), [`computeslip`](@ref)
 """
 @with_kw struct Inputconstants <: inputfile
-    lx::Int32 = 512
-    ly::Int32 = 512
-    maxruntime::Int64 = 100000
-    dumping::Int32 = 1000
-    τ::Float64 = 1.0
-    gravity::Float64 = 0.0
-    γ::Float64 = 0.01
-    δ::Float64 = 1.0
-    μ::Float64 = 1 / 3 * (2 - τ) / 2 * τ
+    lx = 512
+    ly = 512
+    maxruntime = 100000
+    dumping = 1000
+    τ = 1.0
+    gravity = 0.0
+    γ = 0.01
+    δ = 1.0
+    μ = 1 / 3 * (2 - τ) / 2 * τ
 end
 
 """
@@ -58,7 +58,7 @@ end
 
 Reads input parameters from a `file`.
 
-The expected amount of parameters can be addressed with [`inputconstants`](@ref).
+The expected amount of parameters can be addressed with [`Inputconstants`](@ref).
 For now it expects seven values for different runtime constants.
 
 # Example
@@ -80,10 +80,10 @@ julia> writedlm("test.txt", args)
 
 julia> test = readinput("test.txt")
 JuSwalbe.Inputconstants
-  lx: Int32 10
-  ly: Int32 5
+  lx: Int64 10
+  ly: Int64 5
   maxruntime: Int64 1000
-  dumping: Int32 100
+  dumping: Int64 100
   τ: Float64 1.0
   gravity: Float64 0.0
   γ: Float64 0.01
