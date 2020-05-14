@@ -22,7 +22,7 @@ Having no gravity and a surface tension of 0.01 and a slip length of 1.
 ```jldoctest firsttest
 julia> using JuSwalbe
 
-julia> new_input = JuSwalbe.inputconstants(20, 20, 100, 10, 0.0, 0.01, 1.0)
+julia> new_input = JuSwalbe.inputconstants(lx=20, ly=20, maxruntime=100, dumping=10, gravity=0.0, γ=0.01, δ=1.0)
 JuSwalbe.inputconstants(20, 20, 100, 10, 0.0, 0.01, 1.0)
 
 julia> new_input.γ
@@ -94,7 +94,7 @@ function readinput(file)
                 "Lattice_points_y", 
                 "Max_run_time", 
                 "Output_dump", 
-                "Relaxation_rate"
+                "Relaxation_rate",
                 "gravity", 
                 "surface_tension", 
                 "slippage",
@@ -111,7 +111,7 @@ function readinput(file)
                                       input[values[6], 2],
                                       input[values[7], 2],
                                       input[values[8], 2],
-                                      )
+                                      input[values[9], 2])
     
     return runtimeconstants
 end
