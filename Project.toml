@@ -24,6 +24,7 @@ DrWatson = "^1.10"
 Expectations = "^1.4"
 Images = "^0.22"
 JSON = "^0.21"
+Parameters = "0.12"
 julia = "^1.4"
 
 [extras]
