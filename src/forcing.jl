@@ -50,6 +50,7 @@ end
 function computeslip(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}, forces::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}, input::JuSwalbe.Inputconstants) where {T<:Number}
     # Measure the length and allocate a dummy array
     width, thick = size(mom.height)
+    δ, μ = T(input.δ), T(input.μ)
     slippagex = zeros(T, (width, thick))
     slippagey = zeros(T, (width, thick))
     numx = zeros(T, (width, thick))
@@ -58,9 +59,9 @@ function computeslip(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matr
     # Slippage can be calculated assuming a parabolic velocity profile in z
     numx = 6 .* mom.height .* mom.velocity.x
     numy = 6 .* mom.height .* mom.velocity.y
-    denom = 2 .* mom.height .+ 6 * mom.height * input.δ .+ 3 * input.δ^2
-    slippagex = input.μ * ( numx ./ denom )
-    slippagey = input.μ * ( numy ./ denom )
+    denom = 2 .* mom.height .+ 6 * mom.height * δ .+ 3 * δ^2
+    slippagex = μ * ( numx ./ denom )
+    slippagey = μ * ( numy ./ denom )
     # Write the result into the forcing array
     slippage = JuSwalbe.Twovector(x=slippagex, y=slippagey)
     forces.slip = slippage
