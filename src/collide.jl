@@ -92,6 +92,7 @@ JuSwalbe.DistributionD1Q3{Array{Float64,1}}
   f2: Array{Float64}((10,)) [-0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045]
 
 julia> using Test; @test equi.f0 == newdist.f0 # without forces and τ = 1 they have to be equal
+Test Passed
 ```
 
 # References
