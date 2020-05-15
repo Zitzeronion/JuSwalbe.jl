@@ -255,9 +255,9 @@ function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}, force::JuS
     distarray = dist2array(dist)
     forcearrayx, forcearrayy = dist2array(force)
     # The moments are just a summation of distribution functions
-    height = sum(distarray, dims=1)[1, :, :]
-    velocityx = sum(distarray .* lattice_vel[:, 1], dims=1)[1, :, :] + T(0.5) * sum(forcearrayx, dims=3)[:, :, 1]
-    velocityy = sum(distarray .* lattice_vel[:, 2], dims=1)[1, :, :] + T(0.5) * sum(forcearrayy, dims=3)[:, :, 1]
+    height .= sum(distarray, dims=1)[1, :, :]
+    velocityx .= sum(distarray .* lattice_vel[:, 1], dims=1)[1, :, :] .+ T(0.5) * sum(forcearrayx, dims=3)[:, :, 1]
+    velocityy .= sum(distarray .* lattice_vel[:, 2], dims=1)[1, :, :] .+ T(0.5) * sum(forcearrayy, dims=3)[:, :, 1]
     
     velocityx ./= height
     velocityy ./= height

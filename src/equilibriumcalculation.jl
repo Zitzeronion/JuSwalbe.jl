@@ -192,11 +192,11 @@ function calc_equilibrium_distribution(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwa
     # Again make use dicts for iteration purpose
     equiarray = dist2array(equi_dist)
     # Calculate f0
-    equiarray[1, :, :] = mom.height .+ weights[1] * mom.height .*(T(-15.0/8.0) * gravity * mom.height .- T(3.0/2.0) * udotu)
+    equiarray[1, :, :] .= mom.height .+ weights[1] * mom.height .*(T(-15.0/8.0) * gravity * mom.height .- T(3.0/2.0) * udotu)
     # And the other 8 distribtuion functions
     for i in 2:9
         latticeveldotu = mom.velocity.x * lattice_vel[i,1] .+ mom.velocity.y * lattice_vel[i,2]
-        equiarray[i, :, :] = weights[i] * mom.height .* (T(3.0/2.0) * gravity * mom.height
+        equiarray[i, :, :] .= weights[i] * mom.height .* (T(3.0/2.0) * gravity * mom.height
                                                           .+ T(3) * latticeveldotu 
                                                           .+ T(9.0/2.0) * latticeveldotu.^2 
                                                           .- T(3.0/2.0) * udotu)
