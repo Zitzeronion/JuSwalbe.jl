@@ -26,12 +26,77 @@ with `τ` being the relaxation parameter.
 ```jldoctest
 julia> using JuSwalbe
 
-julia> 
+julia> input, mom, force, dist = minimalsetup1d(10)
+(JuSwalbe.Inputconstants
+  lx: Int64 10
+  ly: Int64 512
+  maxruntime: Int64 100000
+  dumping: Int64 1000
+  τ: Float64 1.0
+  gravity: Float64 0.0
+  γ: Float64 0.01
+  δ: Float64 1.0
+  μ: Float64 0.16666666666666666
+, JuSwalbe.Macroquant{Array{Float64,1},Array{Float64,1}}
+  height: Array{Float64}((10,)) [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+  velocity: Array{Float64}((10,)) [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+  pressure: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  energy: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+, JuSwalbe.Forces{Array{Float64,1}}
+  slip: Array{Float64}((10,)) [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+  h∇p: Array{Float64}((10,)) [-0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1]
+  bathymetry: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  thermal: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+, JuSwalbe.DistributionD1Q3{Array{Float64,1}}
+  f0: Array{Float64}((10,)) [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+  f1: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  f2: Array{Float64}((10,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+)
 
+julia> force.slip = zeros(10)
+10-element Array{Float64,1}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
 
+julia> force.h∇p = zeros(10)
+10-element Array{Float64,1}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+
+julia> newdist = collisionBGK(mom, force, dist, input)
+JuSwalbe.DistributionD1Q3{Array{Float64,1}}
+  f0: Array{Float64}((10,)) [0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99]
+  f1: Array{Float64}((10,)) [0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001]
+  f2: Array{Float64}((10,)) [-0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045]
+
+julia> equi = calc_equilibrium_distribution(mom, gravity=input.gravity)
+JuSwalbe.DistributionD1Q3{Array{Float64,1}}
+  f0: Array{Float64}((10,)) [0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99]
+  f1: Array{Float64}((10,)) [0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001, 0.05500000000000001]
+  f2: Array{Float64}((10,)) [-0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045]
+
+julia> using Test; @test equi.f0 == newdist.f0 # without forces and τ = 1 they have to be equal
 ```
 
 # References
+## One spatial dimension
+- [Asymmetric lattice Boltzmann model for shallow water flows](https://www.sciencedirect.com/science/article/abs/pii/S0045793013003599)
 
 """
 function collisionBGK(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, forces::JuSwalbe.Forces{Vector{T}}, tempdist::JuSwalbe.DistributionD1Q3{Vector{T}}, input::JuSwalbe.Inputconstants) where {T<:Number}
