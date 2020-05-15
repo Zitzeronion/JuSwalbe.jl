@@ -1,11 +1,35 @@
 """
     collisionBGK(mom, tempdist, input)
 
-Computes the collision operation for a `D1Q3` and a `D2Q9` lattice Boltzmann algorithm.
+Computes the BGK collision operation for a `D1Q3` and a `D2Q9` lattice Boltzmann algorithm.
+
+The collision operator is the central object in kinetic theory. 
+However there is no general solution for this operator. 
+One work around is to make assumptions and try to model them. 
+The BGK operator is one of the fairly successful operators. 
+It stems from the idea that the distributions are close to their equilibria and that all of them *relax* with a single relaxation time `τ`.
 
 # Math
+The collision operator is usually the right hand side of the kinetic equation 
+
+`` \\partial_t f + \\frac{\\mathbf{p}}{m}\\cdot\\nabla f + \\mathbf{F}\\cdot \\partial_{\\mathbf{p}} f = \\Omega . ``
+
+After tedious mathematics and expansions one can obtain the simplest collision operator the BGK as
+
+`` \\Omega_{BGK} = -\\frac{f - f^{eq}}{\\tau}, ``
+
+with `τ` being the relaxation parameter. 
 
 # Example
+
+## One spatial dimension
+```jldoctest
+julia> using JuSwalbe
+
+julia> 
+
+
+```
 
 # References
 
