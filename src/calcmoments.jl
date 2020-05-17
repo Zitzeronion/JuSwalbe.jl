@@ -253,11 +253,11 @@ function calculatemoments(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}, force::JuS
     indices = [Symbol("f$(i-1)") for i in 1:9]
     # Store all distributions in an array
     distarray = dist2array(dist)
-    forcearrayx, forcearrayy = dist2array(force)
+    forces = dist2array(force)
     # The moments are just a summation of distribution functions
     height .= sum(distarray, dims=1)[1, :, :]
-    velocityx .= sum(distarray .* lattice_vel[:, 1], dims=1)[1, :, :] .+ T(0.5) * sum(forcearrayx, dims=3)[:, :, 1]
-    velocityy .= sum(distarray .* lattice_vel[:, 2], dims=1)[1, :, :] .+ T(0.5) * sum(forcearrayy, dims=3)[:, :, 1]
+    velocityx .= sum(distarray .* lattice_vel[:, 1], dims=1)[1, :, :] .+ T(0.5) * sum(forces.x, dims=3)[:, :, 1]
+    velocityy .= sum(distarray .* lattice_vel[:, 2], dims=1)[1, :, :] .+ T(0.5) * sum(forces.y, dims=3)[:, :, 1]
     
     velocityx ./= height
     velocityy ./= height
@@ -393,5 +393,6 @@ function dist2array(force::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}) where
         forcearrayx[:, :, i] = getfield(getfield(force, j),:x)
         forcearrayy[:, :, i] = getfield(getfield(force, j),:y)
     end
-    return forcearrayx,forcearrayy
+    forces = JuSwalbe.Twovector(x=forcearrayx, y=forcearrayy)
+    return forces
 end

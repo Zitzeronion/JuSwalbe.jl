@@ -124,6 +124,51 @@ function collisionBGK(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, forces::JuS
     return newdist
 end
 
+function collisionBGK(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalbe.Twovector{Matrix{T}}}, forces::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}, tempdist::JuSwalbe.DistributionD2Q9{Matrix{T}}, input::JuSwalbe.Inputconstants) where {T<:Number}
+  # Get the size, type and allocate result array
+  width, thick = size(mom.height)
+  weights = [T(4/9) T(1/9) T(1/9) T(1/9) T(1/9) T(1/36) T(1/36) T(1/36) T(1/36)]
+  clat = [T(0) T(0); T(1) T(0); T(0) T(1); T(-1) T(0); T(0) T(-1); T(1) T(1); T(-1) T(1); T(-1) T(-1); T(1) T(-1)]
+  clatsquare = [T(0) T(1) T(1) T(1) T(1) T(2) T(2) T(2) T(2)]
+  τ = input.τ
+  gravity = input.gravity  
+  csquared = T(3)
+  allforces = dist2array(forces)
+
+  newdist = JuSwalbe.DistributionD2Q9(f0=zeros(T, (width, thick)),
+                                      f1=zeros(T, (width, thick)),
+                                      f2=zeros(T, (width, thick)),
+                                      f3=zeros(T, (width, thick)),
+                                      f4=zeros(T, (width, thick)),
+                                      f5=zeros(T, (width, thick)),
+                                      f6=zeros(T, (width, thick)),
+                                      f7=zeros(T, (width, thick)),
+                                      f8=zeros(T, (width, thick)))
+
+  eqdist = calc_equilibrium_distribution(mom; gravity=T(gravity))
+  
+  newdist.f0 .= T(1-1/τ) * tempdist.f0 .+ T(1/τ) * eqdist.f0 
+
+  newdist.f1 .= (T(1-1/τ) * tempdist.f1 .+ T(1/τ) * eqdist.f1 
+              .+ (weights[2] * csquared)/clatsquare[2] * (clat[2,1] * sum(allforces.x, dims=3)[:, :, 1] .+ clat[2,2] * sum(allforces.y, dims=3)[:, :, 1]))
+  newdist.f2 .= (T(1-1/τ) * tempdist.f2 .+ T(1/τ) * eqdist.f2 
+              .+ (weights[3] * csquared)/clatsquare[3] * (clat[3,1] * sum(allforces.x, dims=3)[:, :, 1] .+ clat[3,2] * sum(allforces.y, dims=3)[:, :, 1]))
+  newdist.f3 .= (T(1-1/τ) * tempdist.f3 .+ T(1/τ) * eqdist.f3 
+              .+ (weights[4] * csquared)/clatsquare[4] * (clat[4,1] * sum(allforces.x, dims=3)[:, :, 1] .+ clat[4,2] * sum(allforces.y, dims=3)[:, :, 1]))
+  newdist.f4 .= (T(1-1/τ) * tempdist.f4 .+ T(1/τ) * eqdist.f4 
+              .+ (weights[5] * csquared)/clatsquare[5] * (clat[5,1] * sum(allforces.x, dims=3)[:, :, 1] .+ clat[5,2] * sum(allforces.y, dims=3)[:, :, 1]))
+  newdist.f5 .= (T(1-1/τ) * tempdist.f5 .+ T(1/τ) * eqdist.f5 
+              .+ (weights[6] * csquared)/clatsquare[6] * (clat[6,1] * sum(allforces.x, dims=3)[:, :, 1] .+ clat[6,2] * sum(allforces.y, dims=3)[:, :, 1]))
+  newdist.f6 .= (T(1-1/τ) * tempdist.f6 .+ T(1/τ) * eqdist.f6 
+              .+ (weights[7] * csquared)/clatsquare[7] * (clat[7,1] * sum(allforces.x, dims=3)[:, :, 1] .+ clat[7,2] * sum(allforces.y, dims=3)[:, :, 1]))
+  newdist.f7 .= (T(1-1/τ) * tempdist.f7 .+ T(1/τ) * eqdist.f7 
+              .+ (weights[8] * csquared)/clatsquare[8] * (clat[8,1] * sum(allforces.x, dims=3)[:, :, 1] .+ clat[8,2] * sum(allforces.y, dims=3)[:, :, 1]))
+  newdist.f8 .= (T(1-1/τ) * tempdist.f8 .+ T(1/τ) * eqdist.f8 
+              .+ (weights[9] * csquared)/clatsquare[9] * (clat[9,1] * sum(allforces.x, dims=3)[:, :, 1] .+ clat[9,2] * sum(allforces.y, dims=3)[:, :, 1]))
+  
+  return newdist
+end
+
 """
     streamdistperiodic!(dist)
 
