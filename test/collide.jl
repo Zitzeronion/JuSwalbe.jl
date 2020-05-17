@@ -87,3 +87,32 @@
         end
     end
 end
+
+@testset "Streaming function" begin
+    @testset "One dimension periodic" begin
+        N = 8
+        typelist = [Float16 Float32 Float64]
+        for type in typelist
+            testtempdist = JuSwalbe.DistributionD1Q3(f0 = fill(type(0.1), N), f1 = fill(type(0.2), N), f2 = fill(type(-0.2), N))
+            testtempdist.f1[3] = type(-0.1)
+            testtempdist.f2[3] = type(0.1)
+
+            @test isa(testtempdist, JuSwalbe.DistributionD1Q3{Vector{type}})
+            streamdistperiodic!(testtempdist)
+            @test isa(testtempdist, JuSwalbe.DistributionD1Q3{Vector{type}})
+            @test length(testtempdist.f0) == 8
+            @test length(testtempdist.f1) == 8
+            @test length(testtempdist.f2) == 8
+            for i in testtempdist.f0
+                @test i == type(0.1)
+            end
+            @test testtempdist.f1[4] == type(-0.1)
+            @test testtempdist.f1[3] == type(0.2)
+            @test testtempdist.f1[5] == type(0.2)
+            @test testtempdist.f2[2] == type(0.1)
+            @test testtempdist.f2[3] == type(-0.2)
+            @test testtempdist.f2[4] == type(-0.2)
+            
+        end
+    end
+end

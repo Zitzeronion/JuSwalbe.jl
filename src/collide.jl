@@ -135,4 +135,9 @@ function streamdistperiodic!(dist::JuSwalbe.DistributionD1Q3{Vector{T}}) where {
     f2dummy = zeros(T, len)
     f1dummy .= circshift(dist.f1, 1)
     f2dummy .= circshift(dist.f2, -1)
+
+    dist.f1 .= f1dummy
+    dist.f2 .= f2dummy
+    
+    return dist
 end

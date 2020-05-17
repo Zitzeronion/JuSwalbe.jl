@@ -139,7 +139,7 @@ export call, readinput, findargument, minimalsetup1d, minimalsetup2d
 # Pressure related 
 export Δh, Π, pressure, ∇p
 # Distributions functions and moments
-export calc_equilibrium_distribution, calculatemoments, dist2array, collisionBGK
+export calc_equilibrium_distribution, calculatemoments, dist2array, collisionBGK, streamdistperiodic!
 # Forces
 export computeslip
 
