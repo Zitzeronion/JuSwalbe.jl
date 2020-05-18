@@ -19,6 +19,13 @@ After tedious mathematics and expansions one can obtain the simplest collision o
 `` \\Omega_{BGK} = -\\frac{f - f^{eq}}{\\tau}, ``
 
 with `τ` being the relaxation parameter. 
+Such the collision process in the lattice Boltzmann method tries to equilibrate the system.
+
+If there is an additional force acting on the fluid, i.e. `gravity` than this part is usually included in the numerical implementation of the collision operator.
+The forcing vector of source term is often called `` \\mathbf{S}_{\\alpha} `` and given by
+
+`` \\mathbf{S}_{\\alpha} = \\Delta t \\frac{3 w_{\\alpha}}{\\mathvbf{c}_{\\alpha}^2}\\mathbf{c}_{\\alpha,i} \\mathbf{F}_i. ``
+
 
 # Example
 
@@ -95,9 +102,115 @@ julia> using Test; @test equi.f0 == newdist.f0 # without forces and τ = 1 they 
 Test Passed
 ```
 
+## Two spatial dimensions
+```jldoctest
+julia> using JuSwalbe, Test
+
+julia> input, mom, force, dist = minimalsetup2d(10,5)
+(JuSwalbe.Inputconstants
+  lx: Int64 10
+  ly: Int64 5
+  maxruntime: Int64 100000
+  dumping: Int64 1000
+  τ: Float64 1.0
+  gravity: Float64 0.0
+  γ: Float64 0.01
+  δ: Float64 1.0
+  μ: Float64 0.16666666666666666
+, JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
+  height: Array{Float64}((10, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  velocity: JuSwalbe.Twovector{Array{Float64,2}}
+  pressure: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  energy: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+, JuSwalbe.Forces{JuSwalbe.Twovector{Array{Float64,2}}}
+  slip: JuSwalbe.Twovector{Array{Float64,2}}
+  h∇p: JuSwalbe.Twovector{Array{Float64,2}}
+  bathymetry: JuSwalbe.Twovector{Array{Float64,2}}
+  thermal: JuSwalbe.Twovector{Array{Float64,2}}
+, JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+  f0: Array{Float64}((10, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  f1: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f2: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f3: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f4: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f5: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f6: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f7: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f8: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+)
+
+julia> dist
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+  f0: Array{Float64}((10, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  f1: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f2: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f3: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f4: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f5: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f6: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f7: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f8: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+
+julia> equi = calc_equilibrium_distribution(mom, gravity=input.gravity)
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+  f0: Array{Float64}((10, 5)) [0.9994666666666666 0.9994666666666666 … 0.9994666666666666 0.9994666666666666; 0.9994666666666666 0.9994666666666666 … 0.9994666666666666 0.9994666666666666; … ; 0.9994666666666666 0.9994666666666666 … 0.9994666666666666 0.9994666666666666; 0.9994666666666666 0.9994666666666666 … 0.9994666666666666 0.9994666666666666]
+  f1: Array{Float64}((10, 5)) [0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; … ; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333]
+  f2: Array{Float64}((10, 5)) [-0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; … ; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999]
+  f3: Array{Float64}((10, 5)) [-0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; … ; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999]
+  f4: Array{Float64}((10, 5)) [0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; … ; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333]
+  f5: Array{Float64}((10, 5)) [-3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; … ; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5]
+  f6: Array{Float64}((10, 5)) [-0.0031666666666666666 -0.0031666666666666666 … -0.0031666666666666666 -0.0031666666666666666; -0.0031666666666666666 -0.0031666666666666666 … -0.0031666666666666666 -0.0031666666666666666; … ; -0.0031666666666666666 -0.0031666666666666666 … -0.0031666666666666666 -0.0031666666666666666; -0.0031666666666666666 -0.0031666666666666666 … -0.0031666666666666666 -0.0031666666666666666]
+  f7: Array{Float64}((10, 5)) [-3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; … ; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5]
+  f8: Array{Float64}((10, 5)) [0.0034999999999999996 0.0034999999999999996 … 0.0034999999999999996 0.0034999999999999996; 0.0034999999999999996 0.0034999999999999996 … 0.0034999999999999996 0.0034999999999999996; … ; 0.0034999999999999996 0.0034999999999999996 … 0.0034999999999999996 0.0034999999999999996; 0.0034999999999999996 0.0034999999999999996 … 0.0034999999999999996 0.0034999999999999996]
+
+julia> force.slip = JuSwalbe.Twovector(x=zeros(10,5), y=zeros(10,5))
+JuSwalbe.Twovector{Array{Float64,2}}
+  x: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  y: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+
+julia> force.h∇p = JuSwalbe.Twovector(x=zeros(10,5), y=zeros(10,5))
+JuSwalbe.Twovector{Array{Float64,2}}
+  x: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  y: Array{Float64}((10, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+
+julia> newdist = collisionBGK(mom, force, dist, input)
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+  f0: Array{Float64}((10, 5)) [0.9994666666666666 0.9994666666666666 … 0.9994666666666666 0.9994666666666666; 0.9994666666666666 0.9994666666666666 … 0.9994666666666666 0.9994666666666666; … ; 0.9994666666666666 0.9994666666666666 … 0.9994666666666666 0.9994666666666666; 0.9994666666666666 0.9994666666666666 … 0.9994666666666666 0.9994666666666666]
+  f1: Array{Float64}((10, 5)) [0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; … ; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333]
+  f2: Array{Float64}((10, 5)) [-0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; … ; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999]
+  f3: Array{Float64}((10, 5)) [-0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; … ; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999; -0.006599999999999999 -0.006599999999999999 … -0.006599999999999999 -0.006599999999999999]
+  f4: Array{Float64}((10, 5)) [0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; … ; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333; 0.006733333333333333 0.006733333333333333 … 0.006733333333333333 0.006733333333333333]
+  f5: Array{Float64}((10, 5)) [-3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; … ; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5]
+  f6: Array{Float64}((10, 5)) [-0.0031666666666666666 -0.0031666666666666666 … -0.0031666666666666666 -0.0031666666666666666; -0.0031666666666666666 -0.0031666666666666666 … -0.0031666666666666666 -0.0031666666666666666; … ; -0.0031666666666666666 -0.0031666666666666666 … -0.0031666666666666666 -0.0031666666666666666; -0.0031666666666666666 -0.0031666666666666666 … -0.0031666666666666666 -0.0031666666666666666]
+  f7: Array{Float64}((10, 5)) [-3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; … ; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5; -3.3333333333333335e-5 -3.3333333333333335e-5 … -3.3333333333333335e-5 -3.3333333333333335e-5]
+  f8: Array{Float64}((10, 5)) [0.0034999999999999996 0.0034999999999999996 … 0.0034999999999999996 0.0034999999999999996; 0.0034999999999999996 0.0034999999999999996 … 0.0034999999999999996 0.0034999999999999996; … ; 0.0034999999999999996 0.0034999999999999996 … 0.0034999999999999996 0.0034999999999999996; 0.0034999999999999996 0.0034999999999999996 … 0.0034999999999999996 0.0034999999999999996]
+
+julia> @test equi.f0 == newdist.f0 # No force and τ=1 means fnew has to be feq!
+Test Passed
+
+julia> @test equi.f2 == newdist.f2
+Test Passed
+```
+
+
 # References
+In general a very good reference concerning the method at all is the book written by Timm Krüger
+-[The Lattice Boltzmann Method: Principles and Practice](https://www.springer.com/gp/book/9783319446479)
+
 ## One spatial dimension
+Here is the work by Chopard et al. really worth reading
 - [Asymmetric lattice Boltzmann model for shallow water flows](https://www.sciencedirect.com/science/article/abs/pii/S0045793013003599)
+
+## Two spatial dimensions
+In two dimensions there is the problematic of how to add forces.
+One way to justify is to do a Chapman Enskog expansion and match the shallow water equations with a source term.
+Apparently there is not a unique solution but a class of possible forcings.
+The first approach by Salmon does not include the lattice weights, which results in isotropy problems.
+On the other hand Zhous approach is not as acqurate as he says, which was pointed out by Chopard.
+Nevertheless here are some references educate yourself which is the fitting one
+-[The lattice Boltzmann method as a basis for ocean circulation modeling, by Salmon](https://www.ingentaconnect.com/content/jmr/jmr/1999/00000057/00000003/art00005)
+-[Lattice Boltzmann Methods for Shallow Water Flows, by Zhou](https://www.springer.com/gp/book/9783540407461)
+-[An evaluation of force terms in the lattice Boltzmann models in simulating shallow water flows over complex topography, by Peng](https://onlinelibrary.wiley.com/doi/pdf/10.1002/fld.4726)
 
 """
 function collisionBGK(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, forces::JuSwalbe.Forces{Vector{T}}, tempdist::JuSwalbe.DistributionD1Q3{Vector{T}}, input::JuSwalbe.Inputconstants) where {T<:Number}
@@ -146,7 +259,7 @@ function collisionBGK(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalbe.Twovector{Matr
                                       f8=zeros(T, (width, thick)))
 
   eqdist = calc_equilibrium_distribution(mom; gravity=T(gravity))
-  
+  # Collision operation for a D2Q9 shallow water lattice Boltzmann.
   newdist.f0 .= T(1-1/τ) * tempdist.f0 .+ T(1/τ) * eqdist.f0 
 
   newdist.f1 .= (T(1-1/τ) * tempdist.f1 .+ T(1/τ) * eqdist.f1 
@@ -185,4 +298,24 @@ function streamdistperiodic!(dist::JuSwalbe.DistributionD1Q3{Vector{T}}) where {
     dist.f2 .= f2dummy
     
     return dist
+end
+
+function streamdistperiodic!(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:Number}
+  width, thick = size(dist.f0)
+  newdist = JuSwalbe.DistributionD2Q9(f0 = zeros(T, (width, thick)), f1 = zeros(T, (width, thick)), f2 = zeros(T, (width, thick)),
+                                      f3 = zeros(T, (width, thick)), f4 = zeros(T, (width, thick)), f5 = zeros(T, (width, thick)),
+                                      f6 = zeros(T, (width, thick)), f7 = zeros(T, (width, thick)), f8 = zeros(T, (width, thick)))
+  # Shifting the distributions by the nine lattice velocities
+  # TODO write an interator for the struct!
+  circshift!(newdist.f0, dist.f0, (0,0))
+  circshift!(newdist.f1, dist.f1, (1,0))
+  circshift!(newdist.f2, dist.f2, (0,1))
+  circshift!(newdist.f3, dist.f3, (-1,0))
+  circshift!(newdist.f4, dist.f4, (0,-1))
+  circshift!(newdist.f5, dist.f5, (1,1))
+  circshift!(newdist.f6, dist.f6, (-1,1))
+  circshift!(newdist.f7, dist.f7, (-1,-1))
+  circshift!(newdist.f8, dist.f8, (1,-1))
+
+  return newdist
 end
