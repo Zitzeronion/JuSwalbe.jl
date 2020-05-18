@@ -179,16 +179,16 @@
             testarray2 = JuSwalbe.Twovector(x=fill(type(0.2), (5,5)), y=fill(type(0.2), (5,5)))
             testforce = JuSwalbe.Forces(slip=testarray1, thermal=testarray1, h∇p=testarray2, bathymetry=testarray1)
             @test isa(testforce, JuSwalbe.Forces)
-            arrx, arry = dist2array(testforce)
-            @test isa(arrx, Array{type, 3})
-            @test isa(arry, Array{type, 3})
-            @test size(arrx) == (5,5,4)
-            @test size(arry) == (5,5,4)
+            arr = dist2array(testforce)
+            @test isa(arr.x, Array{type, 3})
+            @test isa(arr.y, Array{type, 3})
+            @test size(arr.x) == (5,5,4)
+            @test size(arr.y) == (5,5,4)
             for i in 1:5, j in 1:5
-                @test testarray1.x[i,j] == arrx[i,j,1]
-                @test testarray1.y[i,j] == arry[i,j,1]
-                @test testarray2.x[i,j] == arrx[i,j,2]
-                @test testarray2.y[i,j] == arry[i,j,2]
+                @test testarray1.x[i,j] == arr.x[i,j,1]
+                @test testarray1.y[i,j] == arr.y[i,j,1]
+                @test testarray2.x[i,j] == arr.x[i,j,2]
+                @test testarray2.y[i,j] == arr.y[i,j,2]
             end
         end
     end
