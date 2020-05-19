@@ -14,6 +14,7 @@ using Test, DrWatson, DelimitedFiles, Images
     end
     @testset "IO and Others" begin
         include("minimalsetup.jl")
+        include("readwritedata.jl")
     end
 end
 

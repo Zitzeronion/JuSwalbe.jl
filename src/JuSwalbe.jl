@@ -1,7 +1,7 @@
 module JuSwalbe
 
 using Pkg
-using DelimitedFiles, JSON, DrWatson, Images, Parameters
+using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON
 
 include("minimalsetup.jl")
 include("macroscopic_typs.jl")
@@ -12,9 +12,10 @@ include("calculatepressure.jl")
 include("calcmoments.jl")
 include("forcing.jl")
 include("collide.jl")
+include("readwritedata.jl")
 
 # IO related
-export call, readinput, findargument, minimalsetup1d, minimalsetup2d
+export readinput, findargument, minimalsetup1d, minimalsetup2d, savecheckpoint, loadcheckpoint
 # Pressure related 
 export Δh, Π, pressure, ∇p
 # Distributions functions and moments
