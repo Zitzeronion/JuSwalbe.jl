@@ -3,7 +3,6 @@ module JuSwalbe
 using Pkg
 using DelimitedFiles, JSON, DrWatson, Images, Parameters
 
-include("call.jl")
 include("minimalsetup.jl")
 include("macroscopic_typs.jl")
 include("distribution_types.jl")

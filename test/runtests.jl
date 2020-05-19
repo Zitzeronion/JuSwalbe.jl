@@ -13,7 +13,6 @@ using Test, DrWatson, DelimitedFiles, Images
         include("collide.jl")
     end
     @testset "IO and Others" begin
-        include("call.jl")
         include("minimalsetup.jl")
     end
 end
