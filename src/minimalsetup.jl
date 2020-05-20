@@ -149,7 +149,30 @@ function simplemoment2d(n::Int, m::Int; T=Float64)
   return mom
 end
 
+"""
+  simpleTwovector(n,m,T)
+
+Generates a JuSwalbe.Twovector of type T and dimension (n,m).
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> twovec = simpleTwovector(5,5)
+JuSwalbe.Twovector{Array{Float64,2}}
+  x: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  y: Array{Float64}((5, 5)) [-0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1; … ; -0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1]
+
+julia> twovec.x
+5×5 Array{Float64,2}:
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+```
+"""
 function simpleTwovector(n::Int,m::Int; T=Float64)
   xy = JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m)))
-    
+  return xy
 end

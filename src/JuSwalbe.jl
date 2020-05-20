@@ -15,7 +15,9 @@ include("collide.jl")
 include("readwritedata.jl")
 
 # IO related
-export readinput, findargument, minimalsetup1d, minimalsetup2d, simplemoment2d, savecheckpoint, loadcheckpoint, height2file, velocity2file, velocityandheight2file
+export readinput, findargument, minimalsetup1d, minimalsetup2d, simplemoment2d, simpleTwovector
+# File IO
+export savecheckpoint, loadcheckpoint, height2file, velocity2file, velocityandheight2file
 # Pressure related 
 export Δh, Π, pressure, ∇p
 # Distributions functions and moments
