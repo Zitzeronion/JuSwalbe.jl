@@ -117,3 +117,20 @@ function minimalsetup2d(N::Int, M::Int)
                             f6 = zeros(N,M), f7 = zeros(N,M), f8 = zeros(N,M))
     return input, mom, forces, dist
 end
+
+"""
+  simplemoment2d(n,m,type)
+
+Creates moments of type JuSwalbe.Macroquant with dimensions (n,m).
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> mom = simplemoment2d(5,5)
+```
+"""
+function simplemoment2d(n::Int, m::Int; T=Float64)
+  mom = JuSwalbe.Macroquant(height=ones(T, (n,m)), velocity=JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(0.1),(n,m))), pressure=zeros(T, (n,m)), energy=zeros(T,(n,m)))
+  return mom
+end

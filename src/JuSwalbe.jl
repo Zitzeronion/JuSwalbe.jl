@@ -1,7 +1,7 @@
 module JuSwalbe
 
 using Pkg
-using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON
+using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON, Glob
 
 include("minimalsetup.jl")
 include("macroscopic_typs.jl")

@@ -1,5 +1,5 @@
 using JuSwalbe
-using Test, DrWatson, DelimitedFiles, Images
+using Test, DrWatson, DelimitedFiles, Images, BSON
 
 @testset "JuSwalbe.jl" begin
     # @testset "LBM Parts" begin
