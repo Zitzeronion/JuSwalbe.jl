@@ -128,9 +128,28 @@ Creates moments of type JuSwalbe.Macroquant with dimensions (n,m).
 julia> using JuSwalbe
 
 julia> mom = simplemoment2d(5,5)
+JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
+  height: Array{Float64}((5, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  velocity: JuSwalbe.Twovector{Array{Float64,2}}
+  pressure: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  energy: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+
+julia> mom.height
+5×5 Array{Float64,2}:
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+
 ```
 """
 function simplemoment2d(n::Int, m::Int; T=Float64)
-  mom = JuSwalbe.Macroquant(height=ones(T, (n,m)), velocity=JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(0.1),(n,m))), pressure=zeros(T, (n,m)), energy=zeros(T,(n,m)))
+  mom = JuSwalbe.Macroquant(height=ones(T, (n,m)), velocity=JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m))), pressure=zeros(T, (n,m)), energy=zeros(T,(n,m)))
   return mom
+end
+
+function simpleTwovector(n::Int,m::Int; T=Float64)
+  xy = JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m)))
+    
 end
