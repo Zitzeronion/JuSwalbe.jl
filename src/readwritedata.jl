@@ -109,7 +109,7 @@ Such the file can be accessed with another software for e.g. post processing.
     
 # Example
 ```jldoctest
-julia> using JuSwalbe
+julia> using JuSwalbe, BSON
 
 julia> mom = JuSwalbe.Macroquant(height = ones(5,5), velocity=JuSwalbe.Twovector(x=zeros(5,5), y=zeros(5,5)), pressure=zeros(5,5), energy=zeros(5,5))
 JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
@@ -122,7 +122,7 @@ julia> height2file(mom)
 
 julia> h = BSON.load("data/tmp/height_0.bson")
 Dict{Symbol,Any} with 1 entry:
-  :height => [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  :height => [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 …
 
 julia> h[:height]
 5×5 Array{Float64,2}:
@@ -134,6 +134,9 @@ julia> h[:height]
 
 julia> mom.height == h[:height]
 true
+
+julia> rm("data/tmp/height_0.bson")
+
 ```
 
 See also: [`savecheckpoint`](@ref), [`velocity2file`](@ref), [`velocityandheight2file`](@ref)
@@ -155,7 +158,7 @@ In case of `D2Q9` saves both velocity components to the file such `velocity.x` a
 
 # Example
 ```jldoctest
-julia> using JuSwalbe
+julia> using JuSwalbe, BSON
 
 julia> mom = simplemoment2d(5,5)
 JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
@@ -168,8 +171,8 @@ julia> velocity2file(mom)
 
 julia> vel = BSON.load("data/tmp/velocity_0.bson")
 Dict{Symbol,Any} with 2 entries:
-  :velocity_x => [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
-  :velocity_y => [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  :velocity_x => [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; …
+  :velocity_y => [-0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1; … ; -0.1 -0.1 ……
 
 julia> vel[:velocity_x]
 5×5 Array{Float64,2}:
@@ -182,7 +185,9 @@ julia> vel[:velocity_x]
 julia> v = JuSwalbe.Twovector(x = vel[:velocity_x], y = vel[:velocity_y])
 JuSwalbe.Twovector{Array{Float64,2}}
   x: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
-  y: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  y: Array{Float64}((5, 5)) [-0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1; … ; -0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1]
+
+julia> rm("data/tmp/velocity_0.bson")
 ```
 
 See also: [`height2file`](@ref), [`savecheckpoint`](@ref), [`velocityandheight2file`](@ref)
@@ -212,7 +217,7 @@ In case of `D2Q9` saves both velocity components to the file such `velocity.x` a
 
 # Example
 ```jldoctest
-julia> using JuSwalbe
+julia> using JuSwalbe, BSON
 
 julia> mom = simplemoment2d(5,5)
 JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
@@ -225,9 +230,9 @@ julia> velocityandheight2file(mom)
 
 julia> h_vel = BSON.load("data/tmp/height_velocity_0.bson")
 Dict{Symbol,Any} with 3 entries:
-  :height     => [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
-  :velocity_x => [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
-  :velocity_y => [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  :height     => [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; …
+  :velocity_x => [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; …
+  :velocity_y => [-0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1; … ; -0.1 -0.1 ……
 
 julia> h_vel[:height]
 5×5 Array{Float64,2}:
@@ -244,6 +249,8 @@ julia> h_vel[:velocity_x]
  0.1  0.1  0.1  0.1  0.1
  0.1  0.1  0.1  0.1  0.1
  0.1  0.1  0.1  0.1  0.1
+
+julia> rm("data/tmp/height_velocity_0.bson")
 
 ```
 
