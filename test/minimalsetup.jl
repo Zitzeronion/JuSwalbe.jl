@@ -57,4 +57,21 @@ end
             @test size(mom.energy) == (5,5)
         end
     end
+    @testset "Simple D2Q9 Distribution" begin
+        for type in [Float16 Float32 Float64]
+            soldict = Dict(:f0 => type(1.0), :f1 => type(0.1), :f2 => type(-0.1), :f3 => type(0.01), :f4 => type(-0.01),
+                           :f5 => type(0.2), :f6 => type(0.02), :f7 => type(0.02), :f8 => type(0.5))
+            
+                           xy = simpledistD2Q9(5,5; T=type)
+            @test isa(xy, JuSwalbe.DistributionD2Q9{Matrix{type}})
+            xydict = struct2dict(xy)
+            for key in keys(xydict)
+                @test size(xydict[key]) == (5,5)
+                for element in xydict[key]
+                    @test element == soldict[key]
+                end
+            end
+            
+        end
+    end
 end

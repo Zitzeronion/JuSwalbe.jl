@@ -177,7 +177,43 @@ function simpleTwovector(n::Int,m::Int; T=Float64)
   return xy
 end
 
-function simpledistD2Q9(n::Int,m::Int; T=Float64)
+"""
+  simpledistD2Q9(n, m, T)
+
+Generates a `D2Q9` distribution function of dimension `n`,`m` with defined fill statements.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> dist = simpledistD2Q9(5,5)
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+  f0: Array{Float64}((5, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  f1: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f2: Array{Float64}((5, 5)) [-0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1; … ; -0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1]
+  f3: Array{Float64}((5, 5)) [0.01 0.01 … 0.01 0.01; 0.01 0.01 … 0.01 0.01; … ; 0.01 0.01 … 0.01 0.01; 0.01 0.01 … 0.01 0.01]
+  f4: Array{Float64}((5, 5)) [-0.01 -0.01 … -0.01 -0.01; -0.01 -0.01 … -0.01 -0.01; … ; -0.01 -0.01 … -0.01 -0.01; -0.01 -0.01 … -0.01 -0.01]
+  f5: Array{Float64}((5, 5)) [0.2 0.2 … 0.2 0.2; 0.2 0.2 … 0.2 0.2; … ; 0.2 0.2 … 0.2 0.2; 0.2 0.2 … 0.2 0.2]
+  f6: Array{Float64}((5, 5)) [0.02 0.02 … 0.02 0.02; 0.02 0.02 … 0.02 0.02; … ; 0.02 0.02 … 0.02 0.02; 0.02 0.02 … 0.02 0.02]
+  f7: Array{Float64}((5, 5)) [0.02 0.02 … 0.02 0.02; 0.02 0.02 … 0.02 0.02; … ; 0.02 0.02 … 0.02 0.02; 0.02 0.02 … 0.02 0.02]
+  f8: Array{Float64}((5, 5)) [0.5 0.5 … 0.5 0.5; 0.5 0.5 … 0.5 0.5; … ; 0.5 0.5 … 0.5 0.5; 0.5 0.5 … 0.5 0.5]
+
+julia> dist.f0
+5×5 Array{Float64,2}:
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+
+julia> typeof(dist)
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+```
+
+See also: [`simpleTwovector`](@ref), [`simplemoment2d`](@ref)
+
+"""
+function simpledistD2Q9(n::Int, m::Int; T=Float64)
   dist = JuSwalbe.DistributionD2Q9(f0 = ones(T, (n,m)), f1 = fill(T(0.1), (n,m)), f2 = fill(T(-0.1), (n,m)),
                                    f3 = fill(T(0.01), (n,m)), f4 = fill(T(-0.01), (n,m)), f5 = fill(T(0.2), (n,m)), 
                                    f6 = fill(T(0.02), (n,m)), f7 = fill(T(0.02), (n,m)), f8 = fill(T(0.5), (n,m)))
