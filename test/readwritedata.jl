@@ -1,5 +1,42 @@
 @testset "Write/Read Data and Checkpoints" begin
-    @testset "Checkpoints" begin
+    @testset "Checkpoints D1Q3" begin
+        typeset = [Float16 Float32 Float64]
+        for T in typeset
+            testdist = JuSwalbe.DistributionD1Q3(f0=ones(T, 10), f1=fill(T(0.1),10), f2=fill(T(-0.1),10))
+            savecheckpoints(testdist)
+            
+            @test isfile("data/tmp/checkpoint_0.bson")
+            readdist = loadcheckpoint("data/tmp/checkpoint_0.bson")
+            @test testdist.f0 == readdist.f0
+            @test testdist.f1 == readdist.f1
+            @test testdist.f2 == readdist.f2
+
+            rm("data", recursive=true)
+        end
+    end
+    @testset "Checkpoints D2Q9" begin
+        typeset = [Float16 Float32 Float64]
+        for T in typeset
+            testdist = simpledistD2Q9(5,5, T=T)
+            @test isa(testdist, JuSwalbe.DistributionD2Q9{Matrix{T}}) 
+            savecheckpoints(testdist)
+            
+            @test isfile("data/tmp/checkpoint_0.bson")
+            readdist = loadcheckpoint("data/tmp/checkpoint_0.bson")
+            @test testdist.f0 == readdist.f0
+            @test testdist.f1 == readdist.f1
+            @test testdist.f2 == readdist.f2
+            @test testdist.f3 == readdist.f3
+            @test testdist.f4 == readdist.f4
+            @test testdist.f5 == readdist.f5
+            @test testdist.f6 == readdist.f6
+            @test testdist.f7 == readdist.f7
+            @test testdist.f8 == readdist.f8
+
+            rm("data", recursive=true)
+        end
+    end
+    @testset "Checkpoint D1Q3" begin
         typeset = [Float16 Float32 Float64]
         for T in typeset
             testdist = JuSwalbe.DistributionD1Q3(f0=ones(T, 10), f1=fill(T(0.1),10), f2=fill(T(-0.1),10))
@@ -10,6 +47,28 @@
             @test testdist.f0 == readdist.f0
             @test testdist.f1 == readdist.f1
             @test testdist.f2 == readdist.f2
+
+            rm("data", recursive=true)
+        end
+    end
+    @testset "Checkpoints D2Q9" begin
+        typeset = [Float16 Float32 Float64]
+        for T in typeset
+            testdist = simpledistD2Q9(5,5, T=T)
+            @test isa(testdist, JuSwalbe.DistributionD2Q9{Matrix{T}}) 
+            savecheckpoint(testdist)
+            
+            @test isfile("data/tmp/checkpoint_0.bson")
+            readdist = loadcheckpoint("data/tmp/checkpoint_0.bson")
+            @test testdist.f0 == readdist.f0
+            @test testdist.f1 == readdist.f1
+            @test testdist.f2 == readdist.f2
+            @test testdist.f3 == readdist.f3
+            @test testdist.f4 == readdist.f4
+            @test testdist.f5 == readdist.f5
+            @test testdist.f6 == readdist.f6
+            @test testdist.f7 == readdist.f7
+            @test testdist.f8 == readdist.f8
 
             rm("data", recursive=true)
         end

@@ -176,3 +176,11 @@ function simpleTwovector(n::Int,m::Int; T=Float64)
   xy = JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m)))
   return xy
 end
+
+function simpledistD2Q9(n::Int,m::Int; T=Float64)
+  dist = JuSwalbe.DistributionD2Q9(f0 = ones(T, (n,m)), f1 = fill(T(0.1), (n,m)), f2 = fill(T(-0.1), (n,m)),
+                                   f3 = fill(T(0.01), (n,m)), f4 = fill(T(-0.01), (n,m)), f5 = fill(T(0.2), (n,m)), 
+                                   f6 = fill(T(0.02), (n,m)), f7 = fill(T(0.02), (n,m)), f8 = fill(T(0.5), (n,m)))
+
+  return dist
+end
