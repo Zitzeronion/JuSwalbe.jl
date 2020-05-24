@@ -1,5 +1,5 @@
 using JuSwalbe
-using Test, DrWatson, DelimitedFiles, Images
+using Test, DrWatson, DelimitedFiles, Images, BSON
 
 @testset "JuSwalbe.jl" begin
     @testset "LBM Parts" begin
@@ -13,8 +13,8 @@ using Test, DrWatson, DelimitedFiles, Images
         include("collide.jl")
     end
     @testset "IO and Others" begin
-        include("call.jl")
         include("minimalsetup.jl")
+        include("readwritedata.jl")
     end
 end
 

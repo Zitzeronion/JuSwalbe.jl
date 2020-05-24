@@ -117,3 +117,106 @@ function minimalsetup2d(N::Int, M::Int)
                             f6 = zeros(N,M), f7 = zeros(N,M), f8 = zeros(N,M))
     return input, mom, forces, dist
 end
+
+"""
+  simplemoment2d(n,m,type)
+
+Creates moments of type JuSwalbe.Macroquant with dimensions (n,m).
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> mom = simplemoment2d(5,5)
+JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
+  height: Array{Float64}((5, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  velocity: JuSwalbe.Twovector{Array{Float64,2}}
+  pressure: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  energy: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+
+julia> mom.height
+5×5 Array{Float64,2}:
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+
+```
+"""
+function simplemoment2d(n::Int, m::Int; T=Float64)
+  mom = JuSwalbe.Macroquant(height=ones(T, (n,m)), velocity=JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m))), pressure=zeros(T, (n,m)), energy=zeros(T,(n,m)))
+  return mom
+end
+
+"""
+  simpleTwovector(n,m,T)
+
+Generates a JuSwalbe.Twovector of type T and dimension (n,m).
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> twovec = simpleTwovector(5,5)
+JuSwalbe.Twovector{Array{Float64,2}}
+  x: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  y: Array{Float64}((5, 5)) [-0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1; … ; -0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1]
+
+julia> twovec.x
+5×5 Array{Float64,2}:
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+```
+"""
+function simpleTwovector(n::Int,m::Int; T=Float64)
+  xy = JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m)))
+  return xy
+end
+
+"""
+  simpledistD2Q9(n, m, T)
+
+Generates a `D2Q9` distribution function of dimension `n`,`m` with defined fill statements.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> dist = simpledistD2Q9(5,5)
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+  f0: Array{Float64}((5, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  f1: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f2: Array{Float64}((5, 5)) [-0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1; … ; -0.1 -0.1 … -0.1 -0.1; -0.1 -0.1 … -0.1 -0.1]
+  f3: Array{Float64}((5, 5)) [0.01 0.01 … 0.01 0.01; 0.01 0.01 … 0.01 0.01; … ; 0.01 0.01 … 0.01 0.01; 0.01 0.01 … 0.01 0.01]
+  f4: Array{Float64}((5, 5)) [-0.01 -0.01 … -0.01 -0.01; -0.01 -0.01 … -0.01 -0.01; … ; -0.01 -0.01 … -0.01 -0.01; -0.01 -0.01 … -0.01 -0.01]
+  f5: Array{Float64}((5, 5)) [0.2 0.2 … 0.2 0.2; 0.2 0.2 … 0.2 0.2; … ; 0.2 0.2 … 0.2 0.2; 0.2 0.2 … 0.2 0.2]
+  f6: Array{Float64}((5, 5)) [0.02 0.02 … 0.02 0.02; 0.02 0.02 … 0.02 0.02; … ; 0.02 0.02 … 0.02 0.02; 0.02 0.02 … 0.02 0.02]
+  f7: Array{Float64}((5, 5)) [0.02 0.02 … 0.02 0.02; 0.02 0.02 … 0.02 0.02; … ; 0.02 0.02 … 0.02 0.02; 0.02 0.02 … 0.02 0.02]
+  f8: Array{Float64}((5, 5)) [0.5 0.5 … 0.5 0.5; 0.5 0.5 … 0.5 0.5; … ; 0.5 0.5 … 0.5 0.5; 0.5 0.5 … 0.5 0.5]
+
+julia> dist.f0
+5×5 Array{Float64,2}:
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0
+
+julia> typeof(dist)
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+```
+
+See also: [`simpleTwovector`](@ref), [`simplemoment2d`](@ref)
+
+"""
+function simpledistD2Q9(n::Int, m::Int; T=Float64)
+  dist = JuSwalbe.DistributionD2Q9(f0 = ones(T, (n,m)), f1 = fill(T(0.1), (n,m)), f2 = fill(T(-0.1), (n,m)),
+                                   f3 = fill(T(0.01), (n,m)), f4 = fill(T(-0.01), (n,m)), f5 = fill(T(0.2), (n,m)), 
+                                   f6 = fill(T(0.02), (n,m)), f7 = fill(T(0.02), (n,m)), f8 = fill(T(0.5), (n,m)))
+
+  return dist
+end

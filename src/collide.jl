@@ -283,6 +283,7 @@ function collisionBGK(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalbe.Twovector{Matr
   return newdist
 end
 
+
 """
     streamdistperiodic!(dist)
 

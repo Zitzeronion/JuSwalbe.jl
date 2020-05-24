@@ -20,3 +20,58 @@
         @test size(dist.f1) == (10,5)
     end 
 end
+
+@testset "Simple constructions" begin
+    @testset "Simple Twovector" begin
+        for type in [Float16 Float32 Float64]
+            xy = simpleTwovector(5,5; T=type)
+            @test isa(xy, JuSwalbe.Twovector{Matrix{type}})
+            @test size(xy.x) == (5,5)
+            @test size(xy.y) == (5,5)
+            for i in xy.x
+                @test i == type(0.1)
+            end
+            for i in xy.y
+                @test i == type(-0.1)
+            end 
+        end
+    end
+    @testset "Simple Moment two dimensions" begin
+        for type in [Float16 Float32 Float64]
+            mom = simplemoment2d(5,5, T=type)
+            @test isa(mom, JuSwalbe.Macroquant{Matrix{type}, JuSwalbe.Twovector{Matrix{type}}})
+            @test size(mom.height) == (5,5)
+            for i in mom.height
+                @test i == type(1.0)
+            end
+            @test isa(mom.velocity, JuSwalbe.Twovector{Matrix{type}})
+            @test size(mom.velocity.x) == (5,5)
+            for i in mom.velocity.x
+                @test i == type(0.1)
+            end
+            @test size(mom.velocity.y) == (5,5)
+            for i in mom.velocity.y
+                @test i == type(-0.1)
+            end
+            @test size(mom.pressure) == (5,5)
+            @test size(mom.energy) == (5,5)
+        end
+    end
+    @testset "Simple D2Q9 Distribution" begin
+        for type in [Float16 Float32 Float64]
+            soldict = Dict(:f0 => type(1.0), :f1 => type(0.1), :f2 => type(-0.1), :f3 => type(0.01), :f4 => type(-0.01),
+                           :f5 => type(0.2), :f6 => type(0.02), :f7 => type(0.02), :f8 => type(0.5))
+            
+                           xy = simpledistD2Q9(5,5; T=type)
+            @test isa(xy, JuSwalbe.DistributionD2Q9{Matrix{type}})
+            xydict = struct2dict(xy)
+            for key in keys(xydict)
+                @test size(xydict[key]) == (5,5)
+                for element in xydict[key]
+                    @test element == soldict[key]
+                end
+            end
+            
+        end
+    end
+end
