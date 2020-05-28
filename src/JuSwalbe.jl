@@ -1,7 +1,7 @@
 module JuSwalbe
 
     using Pkg
-    using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON, Glob
+    using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON, Glob, Distributions
     using Revise
 
     include("minimalsetup.jl")

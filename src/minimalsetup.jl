@@ -145,7 +145,15 @@ julia> mom.height
 ```
 """
 function simplemoment2d(n::Int, m::Int; T=Float64)
-  mom = JuSwalbe.Macroquant(height=ones(T, (n,m)), velocity=JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m))), pressure=zeros(T, (n,m)), energy=zeros(T,(n,m)))
+  mom = JuSwalbe.Macroquant(height=ones(T, (n,m)), 
+                            velocity=JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m))), 
+                            pressure=zeros(T, (n,m)), 
+                            energy=zeros(T,(n,m)))
+  return mom
+end
+
+function simplemoment1d(n::Int; T=Float64)
+  mom = JuSwalbe.Macroquant(height=ones(T, n), velocity=fill(T(0.1),n), pressure=zeros(T, n), energy=zeros(T, n))
   return mom
 end
 

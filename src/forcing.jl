@@ -68,3 +68,47 @@ function computeslip(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matr
     # Write it out as well
     return slippage
 end
+
+"""
+    computethermalcapillarywaves(mom, force, input)
+
+Computes the forcing arising due to the inclusion of thermal capillary waves that undulate the free surface.
+
+Adds a normal distributed term weighted with the thermal energy kbt to the forcing struct.
+This addition makes it possible to simulate not only the thin film equation but also the stochastic thin film equation.
+
+# Math
+The stochastic thin film equation (STF) much like the thin film equation is derived from the Landau Lifshitz Navier Stokes equation (LLNS).
+Assuming the fluctuations are small and not leading order one can perform an integration of the stochastic stresses, which was done by Grün et al.,
+
+`` \\frac{\\partial h}{\\partial t} = \\nabla\\cdot\\Big[\\frac{h^3}{3\\mu}\\nabla(\\Pi(h) - \\gamma \\Delta h) + \\int_0^h (h-y)\\mathcal{S}_{z||}(y)dy]. ``
+
+Taking into account several assumption it can be shown that the above equation is equal to 
+
+`` \\frac{\\partial h}{\\partial t} = \\nabla\\cdot\\Big[\\frac{h^3}{3\\mu}\\nabla(\\Pi(h) - \\gamma \\Delta h) + \\sqrt{\\frac{2k_BT}{3\\mu}h^3}\\mathcal{N}(t)]. ``
+
+Such the integral of `` \\mathcal{S} `` can be expressed with a single multipicative noise term `` \\mathcal{N} `` which is gaussian distributed with zero mean and a variance of one.
+
+This force is adding exactly the term with `` \\mathcal{N} `` to the forcing struct, however it is a little modified due to slippage.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+```
+"""
+function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, forces::JuSwalbe.Forces{Vector{T}}, input::Inputconstants) where {T<:Number}
+    len = length(mom.height)
+    thermocap = zeros(T, len)
+    slip = deepcopy(forces.slip)
+    μ = T(input.μ)
+    kbt = T(input.kbt)
+    # Generate a Gaussian distribution with zero mean and variance of one 
+    gaussian = Normal()
+    # Fill an array with random numbers distributed according to a Normal
+    gaussianvec = rand(gaussian, len)
+    # Compute the forces due to thermal capillary waves
+    thermocap .= sqrt.(2 * kbt * μ * slip) .* gaussianvec
+
+    forces.thermal = thermocap
+    return thermocap
+end

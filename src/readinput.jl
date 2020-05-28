@@ -6,13 +6,13 @@ Abstract type for all kinds of input files
 abstract type inputfile end
 
 """
-    Inputconstants = new(lx, ly, maxruntime, dumping, gravity, γ, δ)
+    Inputconstants = new(lx, ly, maxruntime, dumping, gravity, γ, δ, kbt)
 
 Struct containing input parameters.
 
 Contains `.lx` lattice points in x-direction, `.ly` lattice points in y-direction. 
 Other fields are `.maxruntime` for the maximal number of time steps and `.dumping` to limit the number of output files.
-On top of these there are physical quantities such as `.gravity`, `.γ` and `.δ` 
+On top of these there are physical quantities such as `.gravity`, `.γ`, `.δ` and `.kbt`.
 for the values of gravitational acceleration, fluids surface tension and the slip length.
 The example relates to an quadratic lattice 20 times 20 lattice units in area. 
 Run for 100 lattice Boltzmann time steps only printing output every 10 time steps.
@@ -33,6 +33,7 @@ JuSwalbe.Inputconstants
   γ: Float64 0.01
   δ: Float64 1.0
   μ: Float64 0.16666666666666666
+  kbt: Float64 0.0
 
 julia> new_input.γ
 0.01
@@ -51,6 +52,7 @@ See also: [`readinput`](@ref), [`findargument`](@ref), [`computeslip`](@ref)
     γ = 0.01
     δ = 1.0
     μ = 1 / 3 * (2 - τ) / 2 * τ
+    kbt = 0.0
 end
 
 """
@@ -89,6 +91,7 @@ JuSwalbe.Inputconstants
   γ: Float64 0.01
   δ: Float64 1.0
   μ: Float64 0.16666666666666666
+  kbt: Float64 0.0
 
 julia> test.lx
 10
@@ -120,7 +123,8 @@ function readinput(file)
                 "gravity", 
                 "surface_tension", 
                 "slippage",
-                "viscosity"]
+                "viscosity", 
+                "k_BT"]
 
     for i in arguments
         push!(values, findfirst(x -> x == i, vec(input)))
@@ -134,8 +138,9 @@ function readinput(file)
     gravity = findargument(input, "gravity")
     γ = findargument(input, "surface_tension")
     δ = findargument(input, "slippage")
+    kbt = findargument(input, "k_BT")
 
-    runtimeconstants = Inputconstants(lx=lx, ly=ly, maxruntime=maxruntime, dumping=dumping, τ=τ, gravity=gravity, γ=γ, δ=δ)
+    runtimeconstants = Inputconstants(lx=lx, ly=ly, maxruntime=maxruntime, dumping=dumping, τ=τ, gravity=gravity, γ=γ, δ=δ, kbt=kbt)
     
     return runtimeconstants
 end
