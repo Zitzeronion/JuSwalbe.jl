@@ -44,6 +44,7 @@ julia> input, mom, force, dist = minimalsetup1d(10)
   γ: Float64 0.01
   δ: Float64 1.0
   μ: Float64 0.16666666666666666
+  kbt: Float64 0.0
 , JuSwalbe.Macroquant{Array{Float64,1},Array{Float64,1}}
   height: Array{Float64}((10,)) [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
   velocity: Array{Float64}((10,)) [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
@@ -117,6 +118,7 @@ julia> input, mom, force, dist = minimalsetup2d(10,5)
   γ: Float64 0.01
   δ: Float64 1.0
   μ: Float64 0.16666666666666666
+  kbt: Float64 0.0
 , JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
   height: Array{Float64}((10, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
   velocity: JuSwalbe.Twovector{Array{Float64,2}}

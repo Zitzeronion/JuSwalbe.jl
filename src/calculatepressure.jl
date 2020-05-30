@@ -350,7 +350,7 @@ For the exact derivation take a look at the references, in principle it is the d
 
 `` \\Phi'(h) = \\Pi(h) `` 
 
-`` \\Pi(h) = \\kappa f(h) = (1-\\cos\\theta)\\frac{(n-1)(m-1)}{(n-m)h_{\\ast}}\\Bigg[\\Bigg(\\frac{h_{\\ast}}{h}\\Bigg)^n - \\Bigg(\\frac{h_{\\ast}}{h}\\Bigg)^m\\Bigg] ``
+`` \\Pi(h) = \\kappa f(h) = (1-\\cos\\theta)\\frac{(n-1)(m-1)}{(n-m)h_{\\ast}}\\Big[\\Big(\\frac{h_{\\ast}}{h}\\Big)^n - \\Big(\\frac{h_{\\ast}}{h}\\Big)^m\\Big] ``
 
 `` \\Pi(h_{\\ast}) = 0 `` 
 
@@ -473,7 +473,7 @@ Since the film pressure has a contribution Δh we need a discreticed laplace ope
 In two dimensions I follow the paper from Santosh and Succi.
 A nine-point stencil is used and the equation goes as follow
 
-`` \\Delta h_{i,j} = \\frac{1}{6}[4\\sum_{nn}h_{i,j} + sum_{diag}h_{i,j} - 20 h_{i,j}] ``
+`` \\Delta h_{i,j} = \\frac{1}{6}[4\\sum_{nn}h_{i,j} + \\sum_{diag}h_{i,j} - 20 h_{i,j}] ``
 
 Where `i` and `j` are the x and y coordinates.
 The index `nn` relates to the nearest neighbors, all four elements which are exactly Δx away from (i,j).

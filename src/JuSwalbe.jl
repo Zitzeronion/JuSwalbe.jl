@@ -16,7 +16,7 @@ module JuSwalbe
     include("readwritedata.jl")
 
     # IO related
-    export readinput, findargument, minimalsetup1d, minimalsetup2d, simplemoment2d, simpleTwovector, simpledistD2Q9
+    export readinput, findargument, minimalsetup1d, minimalsetup2d, simplemoment2d, simpleTwovector, simpledistD2Q9, simplemoment1d
     # File IO
     export savecheckpoint, savecheckpoints, loadcheckpoint, height2file, velocity2file, velocityandheight2file
     # Pressure related 
@@ -24,6 +24,6 @@ module JuSwalbe
     # Distributions functions and moments
     export calc_equilibrium_distribution, calculatemoments, dist2array, collisionBGK, streamdistperiodic!
     # Forces
-    export computeslip
+    export computeslip, computethermalcapillarywaves
 
 end # module

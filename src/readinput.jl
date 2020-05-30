@@ -139,6 +139,9 @@ function readinput(file)
     γ = findargument(input, "surface_tension")
     δ = findargument(input, "slippage")
     kbt = findargument(input, "k_BT")
+    if kbt == nothing
+        kbt = 0.0
+    end
 
     runtimeconstants = Inputconstants(lx=lx, ly=ly, maxruntime=maxruntime, dumping=dumping, τ=τ, gravity=gravity, γ=γ, δ=δ, kbt=kbt)
     

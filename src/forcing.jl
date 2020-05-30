@@ -94,6 +94,50 @@ This force is adding exactly the term with `` \\mathcal{N} `` to the forcing str
 # Example
 ```jldoctest
 julia> using JuSwalbe
+
+julia> mom = simplemoment1d(1000)
+JuSwalbe.Macroquant{Array{Float64,1},Array{Float64,1}}
+  height: Array{Float64}((1000,)) [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0  …  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+  velocity: Array{Float64}((1000,)) [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1  …  0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+  pressure: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  energy: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+julia> force = JuSwalbe.Forces(slip=fill(0.1. 1000), thermal=zeros(1000), h∇p=zeros(1000), bathymetry=zeros(1000))
+JuSwalbe.Forces{Array{Float64,1}}
+  slip: Array{Float64}((1000,)) [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1  …  0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+  h∇p: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  bathymetry: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  thermal: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+julia> input = Inputconstants()
+JuSwalbe.Inputconstants
+  lx: Int64 512
+  ly: Int64 512
+  maxruntime: Int64 100000
+  dumping: Int64 1000
+  τ: Float64 1.0
+  gravity: Float64 0.0
+  γ: Float64 0.01
+  δ: Float64 1.0
+  μ: Float64 0.16666666666666666
+  kbt: Float64 0.0
+
+julia> thermal = computethermalcapillarywaves(mom, force, input); # No k_BT -> no force!
+
+julia> input2 = JuSwalbe.Inputconstants(kbt = 0.001)
+JuSwalbe.Inputconstants
+  lx: Int64 512
+  ly: Int64 512
+  maxruntime: Int64 100000
+  dumping: Int64 1000
+  τ: Float64 1.0
+  gravity: Float64 0.0
+  γ: Float64 0.01
+  δ: Float64 1.0
+  μ: Float64 0.16666666666666666
+  kbt: Float64 0.001
+
+julia> thermal = computethermalcapillarywaves(mom, force, input2);
 ```
 """
 function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, forces::JuSwalbe.Forces{Vector{T}}, input::Inputconstants) where {T<:Number}
@@ -106,6 +150,23 @@ function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Vector{T},Vector{
     gaussian = Normal()
     # Fill an array with random numbers distributed according to a Normal
     gaussianvec = rand(gaussian, len)
+    # Compute the forces due to thermal capillary waves
+    thermocap .= sqrt.(2 * kbt * μ * slip) .* gaussianvec
+
+    forces.thermal = thermocap
+    return thermocap
+end
+
+function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalbe.Twovector{Matrix{T}}}, forces::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}, input::Inputconstants) where {T<:Number}
+    width, thick = size(mom.height)
+    thermocap = zeros(T, (width, thick))
+    slip = deepcopy(forces.slip)
+    μ = T(input.μ)
+    kbt = T(input.kbt)
+    # Generate a Gaussian distribution with zero mean and a variance of one 
+    gaussian = Normal()
+    # Fill an array with random numbers distributed according to a gaussian
+    gaussianvec = rand(gaussian, (width, thick))
     # Compute the forces due to thermal capillary waves
     thermocap .= sqrt.(2 * kbt * μ * slip) .* gaussianvec
 
