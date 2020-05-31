@@ -42,7 +42,7 @@ function computeslip(mom::JuSwalbe.Macroquant{Vector{T}, Vector{T}}, forces::JuS
     denom .= 2 .* mom.height .+ 6 * mom.height * input.δ .+ 3 * input.δ^2
     slippage .= input.μ * (num ./ denom)
     # Write the result into the forcing array
-    forces.slip = slippage
+    forces.slip = - slippage
     # Write it out as well
     return slippage
 end
@@ -64,7 +64,7 @@ function computeslip(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matr
     slippagey .= μ * ( numy ./ denom )
     # Write the result into the forcing array
     slippage = JuSwalbe.Twovector(x=slippagex, y=slippagey)
-    forces.slip = slippage
+    forces.slip = - slippage
     # Write it out as well
     return slippage
 end

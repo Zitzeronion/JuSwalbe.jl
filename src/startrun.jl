@@ -1,3 +1,5 @@
+using Plots
+
 function runsimulation(input::JuSwalbe.Inputconstants)
     lx = input.lx
     ly = input.ly
@@ -6,7 +8,7 @@ function runsimulation(input::JuSwalbe.Inputconstants)
     if ly == 0
         println("Starting a one dimensional simulation")
         # Define an initial fluid state
-        mom = JuSwalbe.Macroquant(height = 2 .+ sin.(4*π.*[1:lx;])./lx, 
+        mom = JuSwalbe.Macroquant(height = 2 .+ sin.(4*π.*[1:lx;]./lx), 
                                   velocity = zeros(lx),
                                   pressure = zeros(lx),
                                   energy = zeros(lx))
@@ -23,15 +25,15 @@ function runsimulation(input::JuSwalbe.Inputconstants)
 
         # Next we iterate until maxruntime is reached
         for time in 1:maxruntime
-            println(mom.height[5], time)
-            # Compute all forces
-            computeslip(mom, forces, input)
-            pressure(mom; γ=input.γ, θ=ones(Float64,1)*1/9)
-            ∇p(mom, forces)
-            computethermalcapillarywaves(mom, forces, input)
-
             # Compute the updated moments
-            mom = calculatemoments(temp_dist, forces)
+            mom = calculatemoments(temp_dist)
+
+            # Compute all forces
+            # computeslip(mom, forces, input)
+            pressure(mom, γ=input.γ, θ=ones(Float64,1)*1/9)
+            ∇p(mom, forces)
+            # computethermalcapillarywaves(mom, forces, input)
+
 
             # Add boundary conditions here
 
@@ -43,12 +45,12 @@ function runsimulation(input::JuSwalbe.Inputconstants)
             # Stream the distribtutions
             temp_dist = streamdistperiodic(out_dist)
             
-            if time%input.dumping == 0
-                plot(mom.height, fill = (0, 0.5, :blue), label="h(x)")
-                println("Hello $time")
-                println(mom.height)
+            if time%100 == 0
+                println("Heigth: ", mom.height[5], " Velocity: ", mom.velocity[5], " Pressure: ", mom.pressure[5], " Time step: ", time)
+                println("Forces -> Pressure-grad: ", forces.h∇p[5], " slippage: ", forces.slip[5])
             end
         end
+        return mom
     else 
         println("Starting a two dimensional simulation")
     end

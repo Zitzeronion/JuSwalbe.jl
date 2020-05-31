@@ -296,7 +296,7 @@ function ∇p(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, force::JuSwalbe.For
     end
     gradp = ∇pout[3:len+2]
     # Write force to force struct
-    force.h∇p = mom.height .* gradp
+    force.h∇p = - mom.height .* gradp
     # Return result
     return  mom.height .* gradp
 end

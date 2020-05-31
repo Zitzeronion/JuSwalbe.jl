@@ -224,7 +224,7 @@ function collisionBGK(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, forces::JuS
     gravity = input.gravity  
     csquared = T(3)
     allforces = zeros(T, len)
-    allforces .= sum(hcat(forces.slip, forces.h∇p, forces.thermal, forces.bathymetry), dims=2)[:,1]
+    allforces = sum(hcat(forces.slip, forces.h∇p, forces.thermal, forces.bathymetry), dims=2)[:,1]
 
     newdist = JuSwalbe.DistributionD1Q3(f0=zeros(T, len),
                                         f1=zeros(T, len),
