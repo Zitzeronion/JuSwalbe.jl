@@ -76,6 +76,8 @@ Computes the forcing arising due to the inclusion of thermal capillary waves tha
 
 Adds a normal distributed term weighted with the thermal energy kbt to the forcing struct.
 This addition makes it possible to simulate not only the thin film equation but also the stochastic thin film equation.
+The output of the function should look like (of course dependent on input) this:
+![Thermo capillary forcing distribution](https://github.com/Zitzeronion/JuSwalbe.jl/tree/thermalforce-feature/images/thermal_forcing.pdf)
 
 # Math
 The stochastic thin film equation (STF) much like the thin film equation is derived from the Landau Lifshitz Navier Stokes equation (LLNS).
@@ -102,14 +104,14 @@ JuSwalbe.Macroquant{Array{Float64,1},Array{Float64,1}}
   pressure: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   energy: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-julia> force = JuSwalbe.Forces(slip=fill(0.1. 1000), thermal=zeros(1000), h∇p=zeros(1000), bathymetry=zeros(1000))
+julia> force = JuSwalbe.Forces(slip=fill(0.1, 1000), thermal=zeros(1000), h∇p=zeros(1000), bathymetry=zeros(1000))
 JuSwalbe.Forces{Array{Float64,1}}
   slip: Array{Float64}((1000,)) [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1  …  0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
   h∇p: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   bathymetry: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   thermal: Array{Float64}((1000,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-julia> input = Inputconstants()
+julia> input = JuSwalbe.Inputconstants()
 JuSwalbe.Inputconstants
   lx: Int64 512
   ly: Int64 512
@@ -137,8 +139,23 @@ JuSwalbe.Inputconstants
   μ: Float64 0.16666666666666666
   kbt: Float64 0.001
 
-julia> thermal = computethermalcapillarywaves(mom, force, input2);
+julia> thermal = computethermalcapillarywaves(mom, force, input2); # Now this force is not just zeros
 ```
+
+# Code
+This function is used to compute a force such one needs it for the collision operator, and if Luo forcing is used for the calculation of the moments
+See also: [`collisionBGK`](@ref), [`calculatemoments`](@ref)
+
+# References
+The theoretical foundation for this was laid by G. Grün and H. Stone,
+- [Thin-Film Flow Influenced by Thermal Noise](https://link.springer.com/article/10.1007/s10955-006-9028-8)
+- [Spreading of Viscous Fluid Drops on a Solid Substrate Assisted by Thermal Fluctuations](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.95.244505)
+
+Some more recent references are
+- [Molecular simulation of thin liquid films: Thermal fluctuations and instability](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.100.023108)
+- [Fully nonlinear dynamics of stochastic thin-film dewetting](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.92.061002)
+
+Basically it reduces to drastically simplify the LLNS under various assumptions and show that the result is more or less equal to something simple.
 """
 function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, forces::JuSwalbe.Forces{Vector{T}}, input::Inputconstants) where {T<:Number}
     len = length(mom.height)
