@@ -2,7 +2,7 @@ module JuSwalbe
 
     using Pkg
     using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON, Glob, Distributions
-    using Revise
+    using Revise, Plots, StatsPlots
 
     include("minimalsetup.jl")
     include("macroscopic_typs.jl")
@@ -14,6 +14,7 @@ module JuSwalbe
     include("forcing.jl")
     include("collide.jl")
     include("readwritedata.jl")
+    include("startrun.jl")
 
     # IO related
     export readinput, findargument, minimalsetup1d, minimalsetup2d, simplemoment2d, simpleTwovector, simpledistD2Q9, simplemoment1d
@@ -22,7 +23,7 @@ module JuSwalbe
     # Pressure related 
     export Δh, Π, pressure, ∇p
     # Distributions functions and moments
-    export calc_equilibrium_distribution, calculatemoments, dist2array, collisionBGK, streamdistperiodic!
+    export calc_equilibrium_distribution, calculatemoments, dist2array, collisionBGK, streamdistperiodic!, streamdistperiodic
     # Forces
     export computeslip, computethermalcapillarywaves
 

@@ -392,6 +392,22 @@ function streamdistperiodic!(dist::JuSwalbe.DistributionD1Q3{Vector{T}}) where {
     return dist
 end
 
+function streamdistperiodic(dist::JuSwalbe.DistributionD1Q3{Vector{T}}) where {T<:Number}
+  len = length(dist.f0)
+  new_dist = JuSwalbe.DistributionD1Q3(f0 = dist.f0,
+                                       f1 = zeros(len),
+                                       f2 = zeros(len))
+  f1dummy = zeros(T, len)
+  f2dummy = zeros(T, len)
+  f1dummy .= circshift(dist.f1, 1)
+  f2dummy .= circshift(dist.f2, -1)
+
+  new_dist.f1 .= f1dummy
+  new_dist.f2 .= f2dummy
+  
+  return new_dist
+end
+
 function streamdistperiodic!(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:Number}
   width, thick = size(dist.f0)
   newdist = zeros(T, (width, thick, 9))
