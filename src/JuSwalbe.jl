@@ -17,7 +17,7 @@ module JuSwalbe
     include("startrun.jl")
 
     # IO related
-    export readinput, findargument, minimalsetup1d, minimalsetup2d, simplemoment2d, simpleTwovector, simpledistD2Q9, simplemoment1d
+    export readinput, findargument, minimalsetup1d, minimalsetup2d, simplemoment2d, simpleTwovector, zeroTwovector, simpledistD2Q9, simplemoment1d
     # File IO
     export savecheckpoint, savecheckpoints, loadcheckpoint, height2file, velocity2file, velocityandheight2file
     # Pressure related 
@@ -26,5 +26,8 @@ module JuSwalbe
     export calc_equilibrium_distribution, calculatemoments, dist2array, collisionBGK, streamdistperiodic!, streamdistperiodic
     # Forces
     export computeslip, computethermalcapillarywaves
+
+    # Full simulations
+    export runsimulation_1D, runsimulation_2D
 
 end # module

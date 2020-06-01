@@ -213,6 +213,17 @@ function simpleTwovector(n::Int,m::Int; T=Float64)
   return xy
 end
 
+function zeroTwovector(n::Int,m::Int; T=Float64)
+  xy = JuSwalbe.Twovector(x=zeros(n,m), y=zeros(n,m))
+  return xy
+end
+
+function zeroTwovectorCU(n::Int,m::Int; T=Float32)
+  jaja = zeros(n,m)
+  xy = JuSwalbe.Twovector(x=CuArray(jaja), y=CuArray(jaja))
+  return xy
+end
+
 """
   simpledistD2Q9(n, m, T)
 

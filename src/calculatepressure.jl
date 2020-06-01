@@ -320,7 +320,7 @@ function ∇p(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalbe.Twovector{Matrix{T}}},
     end
 
     # Write force to force struct
-    force.h∇p = JuSwalbe.Twovector(mom.height .* ∇poutx, mom.height .* ∇pouty)
+    force.h∇p = JuSwalbe.Twovector(x = .- mom.height .* ∇poutx, y = .- mom.height .* ∇pouty)
     output[:, :, 1] = mom.height .* ∇poutx
     output[:, :, 2] = mom.height .* ∇pouty
     # Return result

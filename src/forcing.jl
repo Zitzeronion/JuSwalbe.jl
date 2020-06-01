@@ -63,8 +63,8 @@ function computeslip(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matr
     slippagex .= μ * ( numx ./ denom )
     slippagey .= μ * ( numy ./ denom )
     # Write the result into the forcing array
-    slippage = JuSwalbe.Twovector(x=slippagex, y=slippagey)
-    forces.slip = - slippage
+    slippage = JuSwalbe.Twovector(x= .- slippagex, y= .- slippagey)
+    forces.slip = slippage
     # Write it out as well
     return slippage
 end
@@ -176,17 +176,20 @@ end
 
 function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalbe.Twovector{Matrix{T}}}, forces::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}, input::Inputconstants) where {T<:Number}
     width, thick = size(mom.height)
-    thermocap = zeros(T, (width, thick))
+    thermocapx = zeros(T, (width, thick))
+    thermocapy = zeros(T, (width, thick))
     slip = deepcopy(forces.slip)
     μ = T(input.μ)
     kbt = T(input.kbt)
     # Generate a Gaussian distribution with zero mean and a variance of one 
     gaussian = Normal()
     # Fill an array with random numbers distributed according to a gaussian
-    gaussianvec = rand(gaussian, (width, thick))
+    gaussianvecx = rand(gaussian, (width, thick))
+    gaussianvecy = rand(gaussian, (width, thick))
     # Compute the forces due to thermal capillary waves
-    thermocap .= sqrt.(2 * kbt * μ * slip) .* gaussianvec
+    thermocapx .= sqrt.(2 * kbt * μ * slip.x) .* gaussianvecx
+    thermocapy .= sqrt.(2 * kbt * μ * slip.y) .* gaussianvecy
 
-    forces.thermal = thermocap
-    return thermocap
+    forces.thermal = JuSwalbe.Twovector(x=thermocapx, y=thermocapy)
+    return thermocapx, thermocapy
 end
