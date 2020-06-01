@@ -128,7 +128,7 @@ function runsimulation_2DGPU(input::JuSwalbe.Inputconstants)
 
     h0 = [2 + (sin(4*π*i/lx) * sin(4*π*j/ly)) for i in 1:lx, j in 1:ly]
     h0gpu = Float32.(h0) 
-    hnew = CuArray(h0gpu)
+    hnew = CUDA.CuArray(h0gpu)
     if ly == 0
         println("Please use `runsimulation_1D`")
     else 

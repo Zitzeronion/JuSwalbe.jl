@@ -2,7 +2,7 @@ module JuSwalbe
 
     using Pkg
     using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON, Glob, Distributions
-    using Revise, Plots, StatsPlots
+    using Revise, Plots, StatsPlots, CUDA
 
     include("minimalsetup.jl")
     include("macroscopic_typs.jl")
