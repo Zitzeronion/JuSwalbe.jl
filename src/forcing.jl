@@ -158,6 +158,9 @@ Some more recent references are
 Basically it reduces to drastically simplify the LLNS under various assumptions and show that the result is more or less equal to something simple.
 """
 function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, forces::JuSwalbe.Forces{Vector{T}}, input::Inputconstants) where {T<:Number}
+  if input.kbt == 0.0
+    return
+  else 
     len = length(mom.height)
     thermocap = zeros(T, len)
     slip = deepcopy(forces.slip)
@@ -169,12 +172,15 @@ function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Vector{T},Vector{
     gaussianvec = rand(gaussian, len)
     # Compute the forces due to thermal capillary waves
     thermocap .= sqrt.(2 * kbt * μ * slip) .* gaussianvec
-
     forces.thermal = thermocap
     return thermocap
+  end
 end
 
 function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalbe.Twovector{Matrix{T}}}, forces::JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{T}}}, input::Inputconstants) where {T<:Number}
+  if input.kbt == 0.0
+    return
+  else  
     width, thick = size(mom.height)
     thermocapx = zeros(T, (width, thick))
     thermocapy = zeros(T, (width, thick))
@@ -192,4 +198,5 @@ function computethermalcapillarywaves(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalb
 
     forces.thermal = JuSwalbe.Twovector(x=thermocapx, y=thermocapy)
     return thermocapx, thermocapy
+  end
 end

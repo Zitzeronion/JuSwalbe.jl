@@ -68,8 +68,8 @@
                     @test isa(input, JuSwalbe.Inputconstants)
                     
                     for i in 1:N, j in 1:M
-                        @test slippage.x[i,j] - type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
-                        @test slippage.y[i,j] + type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
+                        @test slippage.x[i,j] + type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
+                        @test slippage.y[i,j] - type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
                     end
                 end
             end
@@ -93,8 +93,8 @@
                     slippage = computeslip(moment, forces, input)
                     
                     for i in 1:N, j in 1:M
-                        @test slippage.x[i,j] - type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
-                        @test slippage.y[i,j] + type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
+                        @test slippage.x[i,j] + type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
+                        @test slippage.y[i,j] - type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
                     end
                 end
             end

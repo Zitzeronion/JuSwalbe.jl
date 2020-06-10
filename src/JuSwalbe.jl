@@ -1,8 +1,8 @@
 module JuSwalbe
-
+    import Base.Threads.@spawn
     using Pkg
     using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON, Glob, Distributions
-    using Revise, Plots, StatsPlots, CUDA
+    using Revise
 
     include("minimalsetup.jl")
     include("macroscopic_typs.jl")
@@ -14,7 +14,7 @@ module JuSwalbe
     include("forcing.jl")
     include("collide.jl")
     include("readwritedata.jl")
-    include("startrun.jl")
+    # include("startrun.jl")
 
     # IO related
     export readinput, findargument, minimalsetup1d, minimalsetup2d, simplemoment2d, simpleTwovector, zeroTwovector, simpledistD2Q9, simplemoment1d
@@ -28,6 +28,6 @@ module JuSwalbe
     export computeslip, computethermalcapillarywaves
 
     # Full simulations
-    export runsimulation_1D, runsimulation_2D
+    # export runsimulation_1D, runsimulation_2D
 
 end # module

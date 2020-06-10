@@ -89,31 +89,31 @@ function runsimulation_2D(input::JuSwalbe.Inputconstants)
         # Next we iterate until maxruntime is reached
         for time in 1:maxruntime
             # Compute the updated moments
-            mom = calculatemoments(temp_dist)
+            mom = @spawn calculatemoments(temp_dist)
 
             # Compute all forces
-            computeslip(mom, forces, input)
-            pressure(mom, γ=input.γ, θ=ones(Float64,(1,1))*1/9)
-            ∇p(mom, forces)
-            computethermalcapillarywaves(mom, forces, input)
+            computeslip(fetch(mom), forces, input)
+            pressure(fetch(mom), γ=input.γ, θ=ones(Float64,(1,1))*1/9)
+            ∇p(fetch(mom), forces)
+            computethermalcapillarywaves(fetch(mom), forces, input)
 
 
             # Add boundary conditions here
 
             # Performe the collision
-            out_dist = collisionBGK(mom, forces, temp_dist, input)
+            out_dist = @spawn collisionBGK(fetch(mom), forces, temp_dist, input)
 
             # Add obstacles and bounce back here
 
             # Stream the distribtutions
-            temp_dist = streamdistperiodic(out_dist)
+            temp_dist = streamdistperiodic(fetch(out_dist))
             if time % 1000 == 0
                 println("Time step: $time")
             end
 
         end
         s1 = heatmap(h0)
-        s2 = heatmap(mom.height)
+        s2 = heatmap(fetch(mom).height)
         plot(s1, s2)
         gui()
         return mom

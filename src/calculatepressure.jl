@@ -184,7 +184,7 @@ JuSwalbe.Forces{JuSwalbe.Twovector{Array{Float64,2}}}
   bathymetry: JuSwalbe.Twovector{Array{Float64,2}}
   thermal: JuSwalbe.Twovector{Array{Float64,2}}
 
-julia> gradp = ∇p(mom, f)
+julia> gradp = - ∇p(mom, f)
 5×5×2 Array{Float64,3}:
 [:, :, 1] =
  -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
