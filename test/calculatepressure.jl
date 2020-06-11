@@ -331,21 +331,21 @@
             moment.pressure[3,3] = type(1.0)
             testgrad = ∇p(moment, testforce)
             # Upper row
-            @test testforce.h∇p.x[2,2] - moment.height[2,2]*type(1/12) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p.x[2,3] - moment.height[2,3]*type(1/3) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p.x[2,4] - moment.height[2,4]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.x[2,2] - moment.height[2,2]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.x[2,3] - moment.height[2,3]*type(1/3) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.x[2,4] - moment.height[2,4]*type(1/12) ≈ type(0) atol=tolerances[type]
             # Lower row
-            @test testforce.h∇p.x[4,2] + moment.height[4,2]*type(1/12) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p.x[4,3] + moment.height[4,3]*type(1/3) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p.x[4,4] + moment.height[4,4]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.x[4,2] + moment.height[4,2]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.x[4,3] + moment.height[4,3]*type(1/3) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.x[4,4] + moment.height[4,4]*type(1/12) ≈ type(0) atol=tolerances[type]
             # Left column
-            @test testforce.h∇p.y[2,2] - moment.height[2,2]*type(1/12) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p.y[3,2] - moment.height[3,2]*type(1/3) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p.y[4,2] - moment.height[4,2]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.y[2,2] - moment.height[2,2]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.y[3,2] - moment.height[3,2]*type(1/3) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.y[4,2] - moment.height[4,2]*type(1/12) ≈ type(0) atol=tolerances[type]
             # Right column
-            @test testforce.h∇p.y[2,4] + moment.height[2,4]*type(1/12) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p.y[3,4] + moment.height[3,4]*type(1/3) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p.y[4,4] + moment.height[4,4]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.y[2,4] + moment.height[2,4]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.y[3,4] + moment.height[3,4]*type(1/3) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p.y[4,4] + moment.height[4,4]*type(1/12) ≈ type(0) atol=tolerances[type]
         end
     end
     @testset "Pressure gradient h∇p one dimension" begin
@@ -366,11 +366,11 @@
             testforce.h∇p = zeros(type, 5)
             testgrad = ∇p(moment, testforce)
             # Upper row
-            @test testforce.h∇p[1] + moment.height[1]*type(1/12) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p[2] - moment.height[2]*type(2/3) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p[3] + moment.height[3]*type(0) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p[4] + moment.height[4]*type(2/3) ≈ type(0) atol=tolerances[type]
-            @test testforce.h∇p[5] - moment.height[5]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p[1] + moment.height[1]*type(1/12) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p[2] - moment.height[2]*type(2/3) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p[3] + moment.height[3]*type(0) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p[4] + moment.height[4]*type(2/3) ≈ type(0) atol=tolerances[type]
+            @test - testforce.h∇p[5] - moment.height[5]*type(1/12) ≈ type(0) atol=tolerances[type]
             
         end
     end

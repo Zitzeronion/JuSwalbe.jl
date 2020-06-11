@@ -22,6 +22,23 @@
 end
 
 @testset "Simple constructions" begin
+    @testset "Simple Moment one dimension" begin
+        for type in [Float16 Float32 Float64]
+            mom = simplemoment1d(5, T=type)
+            @test isa(mom, JuSwalbe.Macroquant{Vector{type}, Vector{type}})
+            @test length(mom.height) == 5
+            for i in mom.height
+                @test i == type(1.0)
+            end
+            @test isa(mom.velocity, Vector{type})
+            @test length(mom.velocity) == 5
+            for i in mom.velocity
+                @test i == type(0.1)
+            end
+            @test length(mom.pressure) == 5
+            @test length(mom.energy) == 5
+        end
+    end
     @testset "Simple Twovector" begin
         for type in [Float16 Float32 Float64]
             xy = simpleTwovector(5,5; T=type)

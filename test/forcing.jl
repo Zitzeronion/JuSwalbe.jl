@@ -68,8 +68,8 @@
                     @test isa(input, JuSwalbe.Inputconstants)
                     
                     for i in 1:N, j in 1:M
-                        @test slippage.x[i,j] - type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
-                        @test slippage.y[i,j] + type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
+                        @test slippage.x[i,j] + type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
+                        @test slippage.y[i,j] - type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
                     end
                 end
             end
@@ -93,11 +93,39 @@
                     slippage = computeslip(moment, forces, input)
                     
                     for i in 1:N, j in 1:M
-                        @test slippage.x[i,j] - type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
-                        @test slippage.y[i,j] + type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
+                        @test slippage.x[i,j] + type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
+                        @test slippage.y[i,j] - type(sol_set[delta]) ≈ type(0.0) atol=tolerances[type]
                     end
                 end
             end
+        end
+    end
+    @testset "Thermo capillary forcing two dimensions" begin
+        N, M = 8, 9
+        typelist = [Float16 Float32 Float64]
+        for type in typelist
+            # Test different delta values
+            mom = simplemoment2d(N, M; T=type)
+            force = JuSwalbe.Forces(slip=JuSwalbe.Twovector(x=fill(type(0.1), (N,M)), y=fill(type(0.1), (N,M))), h∇p = simpleTwovector(N, M; T=type),
+                                    thermal=JuSwalbe.Twovector(x=zeros(type, (N,M)), y=zeros(type, (N,M))), bathymetry=JuSwalbe.Twovector(x=zeros(type, (N,M)), y=zeros(type, (N,M))))
+            @test isa(force, JuSwalbe.Forces{JuSwalbe.Twovector{Matrix{type}}})
+            @test isa(force.thermal.x, Array{type, 2})
+            @test isa(force.thermal.y, Array{type, 2})
+            @test size(force.thermal.x) == (N,M)
+            @test size(force.thermal.y) == (N,M)
+        end
+    end
+    @testset "Thermo capillary forcing one dimension" begin
+        N = 8
+        typelist = [Float16 Float32 Float64]
+        for type in typelist
+            # Test different delta values
+            mom = simplemoment1d(N; T=type)
+            force = JuSwalbe.Forces(slip=fill(type(0.1), N) , h∇p = zeros(type, N),
+                                    thermal=zeros(type, N), bathymetry=zeros(type, N))
+            @test isa(force, JuSwalbe.Forces{Vector{type}})
+            @test isa(force.thermal, Array{type, 1})
+            @test length(force.thermal) == N
         end
     end
 end

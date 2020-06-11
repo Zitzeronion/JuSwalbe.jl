@@ -44,6 +44,7 @@ julia> input, mom, force, dist = minimalsetup1d(10)
   γ: Float64 0.01
   δ: Float64 1.0
   μ: Float64 0.16666666666666666
+  kbt: Float64 0.0
 , JuSwalbe.Macroquant{Array{Float64,1},Array{Float64,1}}
   height: Array{Float64}((10,)) [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
   velocity: Array{Float64}((10,)) [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
@@ -117,6 +118,7 @@ julia> input, mom, force, dist = minimalsetup2d(10,5)
   γ: Float64 0.01
   δ: Float64 1.0
   μ: Float64 0.16666666666666666
+  kbt: Float64 0.0
 , JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
   height: Array{Float64}((10, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
   velocity: JuSwalbe.Twovector{Array{Float64,2}}
@@ -222,7 +224,7 @@ function collisionBGK(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, forces::JuS
     gravity = input.gravity  
     csquared = T(3)
     allforces = zeros(T, len)
-    allforces .= sum(hcat(forces.slip, forces.h∇p, forces.thermal, forces.bathymetry), dims=2)[:,1]
+    allforces = sum(hcat(forces.slip, forces.h∇p, forces.thermal, forces.bathymetry), dims=2)[:,1]
 
     newdist = JuSwalbe.DistributionD1Q3(f0=zeros(T, len),
                                         f1=zeros(T, len),
@@ -405,4 +407,135 @@ function streamdistperiodic!(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {
                                    f6=newdist[:, :, 7], f7=newdist[:, :, 8], f8=newdist[:, :, 9])
 
   return dist
+end
+
+"""
+    streamdistperiodic(dist)
+
+Streams the lattice Boltzmann distribution accoriding to their velocity vector.
+
+The so called streaming process transports the distribution functions according to thier lattice velocity.
+In one dimension this means that the zero velocity distribution stays at its lattice point while the positive velocity advances by one lattice node.
+Of course the negative velocity component `.f2` decreases its lattice index by one.
+
+In two dimensions there are nine of these operations according to the `D2Q9` lattice vectors.
+
+# Math
+After the collision process the newly calculated distribution functions need to be streamed.
+They performe one interation or streaming per time update.
+Such the distributions after collision `` f^{\\ast}_i `` are transported to their respective new position
+
+`` f^{\\ast}_i(\\mathbf{x} + \\mathbf{c}_i \\Delta t)``
+
+One has to be careful in the proximity of boundaries, because they could destroy mass which is unphysical.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> dist = JuSwalbe.DistributionD2Q9(f0=ones(5,5), f1=fill(0.1, (5,5)), f2=fill(0.1, (5,5)),
+                                        f3=fill(0.1, (5,5)), f4=fill(0.1, (5,5)), f5=zeros(5,5),
+                                        f6=zeros(5,5), f7=zeros(5,5), f8=zeros(5,5))
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+  f0: Array{Float64}((5, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  f1: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f2: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f3: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f4: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f5: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f6: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f7: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f8: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+   
+julia> dist.f1[2,2] = 1; dist.f2[2,2] = 1; dist.f5[2,2] = 1; dist.f3[2,2] = 1; dist.f8[2,2] = 1 
+1
+
+julia> newdist = streamdistperiodic(dist)
+JuSwalbe.DistributionD2Q9{Array{Float64,2}}
+  f0: Array{Float64}((5, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
+  f1: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f2: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f3: Array{Float64}((5, 5)) [0.1 1.0 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f4: Array{Float64}((5, 5)) [0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1; … ; 0.1 0.1 … 0.1 0.1; 0.1 0.1 … 0.1 0.1]
+  f5: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f6: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f7: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+  f8: Array{Float64}((5, 5)) [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0]
+
+julia> dist.f1
+5×5 Array{Float64,2}:
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  1.0  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+julia> newdist.f1
+5×5 Array{Float64,2}:
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  1.0  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+julia> dist.f8
+5×5 Array{Float64,2}:
+ 0.0  0.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0
+
+julia> newdist.f8
+5×5 Array{Float64,2}:
+ 0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0
+ 1.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0
+ 
+```
+
+# References
+Any book on the lattice Boltzmann method should do.
+- [The Lattice Boltzmann Method: Principles and Practice](https://www.springer.com/gp/book/9783319446479)
+
+See also [`collisionBGK`](@ref)
+"""
+function streamdistperiodic(dist::JuSwalbe.DistributionD1Q3{Vector{T}}) where {T<:Number}
+  len = length(dist.f0)
+  new_dist = JuSwalbe.DistributionD1Q3(f0 = dist.f0,
+                                       f1 = zeros(len),
+                                       f2 = zeros(len))
+  f1dummy = zeros(T, len)
+  f2dummy = zeros(T, len)
+  f1dummy .= circshift(dist.f1, 1)
+  f2dummy .= circshift(dist.f2, -1)
+
+  new_dist.f1 .= f1dummy
+  new_dist.f2 .= f2dummy
+  
+  return new_dist
+end
+
+function streamdistperiodic(dist::JuSwalbe.DistributionD2Q9{Matrix{T}}) where {T<:Number}
+  width, thick = size(dist.f0)
+  arr = zeros(width, thick, 9)
+  
+  distarray = dist2array(dist)
+  latvel = [(0, 0); (1, 0); (0, 1); (-1, 0); (0, -1); (1, 1); (-1, 1); (-1, -1); (1, -1)]
+  for i in 2:9
+    arr[:, :, i] .= circshift(distarray[i, :, :], latvel[i])
+  end
+  new_dist = JuSwalbe.DistributionD2Q9(f0 = dist.f0,
+                                       f1 = arr[:, :, 2],
+                                       f2 = arr[:, :, 3],
+                                       f3 = arr[:, :, 4],
+                                       f4 = arr[:, :, 5],
+                                       f5 = arr[:, :, 6],
+                                       f6 = arr[:, :, 7],
+                                       f7 = arr[:, :, 8],
+                                       f8 = arr[:, :, 9])
+  
+  return new_dist
 end

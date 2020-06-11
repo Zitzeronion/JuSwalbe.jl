@@ -184,37 +184,37 @@ JuSwalbe.Forces{JuSwalbe.Twovector{Array{Float64,2}}}
   bathymetry: JuSwalbe.Twovector{Array{Float64,2}}
   thermal: JuSwalbe.Twovector{Array{Float64,2}}
 
-julia> gradp = ∇p(mom, f)
+julia> gradp = - ∇p(mom, f)
 5×5×2 Array{Float64,3}:
 [:, :, 1] =
- -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
- -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
-  0.0           0.0          0.0          0.0          0.0
-  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
   0.00166667    0.00097105  -0.0102825    0.00097105   0.00166667
+  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
+ -0.0          -0.0         -0.0         -0.0         -0.0
+ -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
+ -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
 
 [:, :, 2] =
- -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
- -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
-  0.0102825   -0.00277309   0.0   0.00277309   -0.0102825
- -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
- -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
+  0.00166667   0.000137716  -0.0  -0.000137716  -0.00166667
+  0.00097105  -0.00833802   -0.0   0.00833802   -0.00097105
+ -0.0102825    0.00277309   -0.0  -0.00277309    0.0102825
+  0.00097105  -0.00833802   -0.0   0.00833802   -0.00097105
+  0.00166667   0.000137716  -0.0  -0.000137716  -0.00166667
 
-julia> f.h∇p.x
+julia> f.h∇p.x # The force comes with sign          
 5×5 Array{Float64,2}:
- -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
- -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
-  0.0           0.0          0.0          0.0          0.0
-  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
   0.00166667    0.00097105  -0.0102825    0.00097105   0.00166667
+  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
+ -0.0          -0.0         -0.0         -0.0         -0.0
+ -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
+ -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
 
-julia> f.h∇p.y
+julia> f.h∇p.y # Same as for the x values
 5×5 Array{Float64,2}:
- -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
- -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
-  0.0102825   -0.00277309   0.0   0.00277309   -0.0102825
- -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
- -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
+  0.00166667   0.000137716  -0.0  -0.000137716  -0.00166667
+  0.00097105  -0.00833802   -0.0   0.00833802   -0.00097105
+ -0.0102825    0.00277309   -0.0  -0.00277309    0.0102825
+  0.00097105  -0.00833802   -0.0   0.00833802   -0.00097105
+  0.00166667   0.000137716  -0.0  -0.000137716  -0.00166667
  
 ```
 
@@ -296,7 +296,7 @@ function ∇p(mom::JuSwalbe.Macroquant{Vector{T},Vector{T}}, force::JuSwalbe.For
     end
     gradp = ∇pout[3:len+2]
     # Write force to force struct
-    force.h∇p = mom.height .* gradp
+    force.h∇p = - mom.height .* gradp
     # Return result
     return  mom.height .* gradp
 end
@@ -320,7 +320,7 @@ function ∇p(mom::JuSwalbe.Macroquant{Matrix{T},JuSwalbe.Twovector{Matrix{T}}},
     end
 
     # Write force to force struct
-    force.h∇p = JuSwalbe.Twovector(mom.height .* ∇poutx, mom.height .* ∇pouty)
+    force.h∇p = JuSwalbe.Twovector(x = .- mom.height .* ∇poutx, y = .- mom.height .* ∇pouty)
     output[:, :, 1] = mom.height .* ∇poutx
     output[:, :, 2] = mom.height .* ∇pouty
     # Return result
@@ -350,7 +350,7 @@ For the exact derivation take a look at the references, in principle it is the d
 
 `` \\Phi'(h) = \\Pi(h) `` 
 
-`` \\Pi(h) = \\kappa f(h) = (1-\\cos\\theta)\\frac{(n-1)(m-1)}{(n-m)h_{\\ast}}\\Bigg[\\Bigg(\\frac{h_{\\ast}}{h}\\Bigg)^n - \\Bigg(\\frac{h_{\\ast}}{h}\\Bigg)^m\\Bigg] ``
+`` \\Pi(h) = \\kappa f(h) = (1-\\cos\\theta)\\frac{(n-1)(m-1)}{(n-m)h_{\\ast}}\\Big[\\Big(\\frac{h_{\\ast}}{h}\\Big)^n - \\Big(\\frac{h_{\\ast}}{h}\\Big)^m\\Big] ``
 
 `` \\Pi(h_{\\ast}) = 0 `` 
 
@@ -409,47 +409,107 @@ A rather recent new setup for the shape of `Π` can be found in
 """ 
 function Π(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01), θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}   
     # Theoretical minimum of the wetting pontential
+    hbyhstar_n = ones(T, size(mom.height))
+    hbyhstar_m = ones(T, size(mom.height))
+    Π_h = zeros(T, size(mom.height))
     
+    hbyhstar_n = power(h_star ./ mom.height, exponents[1])
+    hbyhstar_m = power(h_star ./ mom.height, exponents[2])
+
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
     Π_h = (γ .* (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1)/((exponents[1] - exponents[2])*h_star) 
-          .* ((h_star ./ mom.height).^exponents[1] .- (h_star ./ mom.height).^exponents[2]))
+          .* (hbyhstar_n .- hbyhstar_m))
     
     return Π_h 
 end
 
 function Π(height::Array{T,2}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01), θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}
     # Theoretical minimum of the wetting potential, two dimensional on array
-    
+    Π_h = zeros(T, size(height))
+
+    hbyhstar_n = power(h_star ./ height, exponents[1])
+    hbyhstar_m = power(h_star ./ height, exponents[2])
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
     Π_h = (γ .* (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
-          .* ((h_star ./ height).^exponents[1] .- (h_star ./ height).^exponents[2]))
+          .* (hbyhstar_n .- hbyhstar_m))
     
     return Π_h 
 end
 # One dimensional implementation
 function Π(mom::JuSwalbe.Macroquant{Vector{T}, Vector{T}}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01), θ::Vector{T}=ones(T,1)*T(1/9)) where {T<:Number}   
     # Theoretical minimum of the wetting pontential
-    
+    Π_h = zeros(T, length(mom.height))
+
+    hbyhstar_n = power(h_star ./ mom.height, exponents[1])
+    hbyhstar_m = power(h_star ./ mom.height, exponents[2])
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
     Π_h = (γ .* (1 .- cospi.(θ)) 
-          .* (exponents[1] - 1)*(exponents[2] - 1)/((exponents[1] - exponents[2])*h_star) 
-          .* ((h_star ./ mom.height).^exponents[1] .- (h_star ./ mom.height).^exponents[2]))
-    
+          .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
+          .* (hbyhstar_n .- hbyhstar_m))
+
     return Π_h 
 end
 
 function Π(height::Array{T,1}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01), θ::Vector{T}=ones(T,1)*T(1/9)) where {T<:Number}
     # Theoretical minimum of the wetting potential, one dimensional on array
-    
+    Π_h = zeros(T, length(height))
+
+    hbyhstar_n = power(h_star ./ height, exponents[1])
+    hbyhstar_m = power(h_star ./ height, exponents[2])
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
     Π_h = (γ .* (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
-          .* ((h_star ./ height).^exponents[1] .- (h_star ./ height).^exponents[2]))
+          .* (hbyhstar_n .- hbyhstar_m))
     
     return Π_h 
 end
+
+"""
+  power(array, n)
+
+Computes the `n`th power elementwise of an `array`.
+
+Turns out this is about **two** times faster than using `.^`, the build in power function.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> h = fill(0.1, (5,5))
+5×5 Array{Float64,2}:
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+julia> JuSwalbe.power(h, 3)
+5×5 Array{Float64,2}:
+ 0.001  0.001  0.001  0.001  0.001
+ 0.001  0.001  0.001  0.001  0.001
+ 0.001  0.001  0.001  0.001  0.001
+ 0.001  0.001  0.001  0.001  0.001
+ 0.001  0.001  0.001  0.001  0.001
+
+```
+"""
+function power(array::Array{T, 2}, n::Int) where {T<:Number}
+  temp = ones(T, size(array))
+  for i = 1:n
+    temp .*= array
+  end
+  return temp
+end
+function power(array::Array{T, 1}, n::Int) where {T<:Number}
+  temp = ones(T, length(array))
+  for i = 1:n
+    temp .*= array
+  end
+  return temp
+end
+
 
 """
     Δh(mom::JuSwalbe.Macroquant)
@@ -473,7 +533,7 @@ Since the film pressure has a contribution Δh we need a discreticed laplace ope
 In two dimensions I follow the paper from Santosh and Succi.
 A nine-point stencil is used and the equation goes as follow
 
-`` \\Delta h_{i,j} = \\frac{1}{6}[4\\sum_{nn}h_{i,j} + sum_{diag}h_{i,j} - 20 h_{i,j}] ``
+`` \\Delta h_{i,j} = \\frac{1}{6}[4\\sum_{nn}h_{i,j} + \\sum_{diag}h_{i,j} - 20 h_{i,j}] ``
 
 Where `i` and `j` are the x and y coordinates.
 The index `nn` relates to the nearest neighbors, all four elements which are exactly Δx away from (i,j).

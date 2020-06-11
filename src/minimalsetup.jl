@@ -21,6 +21,7 @@ julia> constants, mom, f, distribution = minimalsetup1d(10)
   γ: Float64 0.01
   δ: Float64 1.0
   μ: Float64 0.16666666666666666
+  kbt: Float64 0.0
 , JuSwalbe.Macroquant{Array{Float64,1},Array{Float64,1}}
   height: Array{Float64}((10,)) [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
   velocity: Array{Float64}((10,)) [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
@@ -80,6 +81,7 @@ julia> input, mom, f, dist = minimalsetup2d(5,5)
   γ: Float64 0.01
   δ: Float64 1.0
   μ: Float64 0.16666666666666666
+  kbt: Float64 0.0
 , JuSwalbe.Macroquant{Array{Float64,2},JuSwalbe.Twovector{Array{Float64,2}}}
   height: Array{Float64}((5, 5)) [1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0; … ; 1.0 1.0 … 1.0 1.0; 1.0 1.0 … 1.0 1.0]
   velocity: JuSwalbe.Twovector{Array{Float64,2}}
@@ -145,7 +147,41 @@ julia> mom.height
 ```
 """
 function simplemoment2d(n::Int, m::Int; T=Float64)
-  mom = JuSwalbe.Macroquant(height=ones(T, (n,m)), velocity=JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m))), pressure=zeros(T, (n,m)), energy=zeros(T,(n,m)))
+  mom = JuSwalbe.Macroquant(height=ones(T, (n,m)), 
+                            velocity=JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m))), 
+                            pressure=zeros(T, (n,m)), 
+                            energy=zeros(T,(n,m)))
+  return mom
+end
+
+"""
+  simplemoment1d(n,type)
+
+Creates moments of type JuSwalbe.Macroquant with length n.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> mom = simplemoment1d(5)
+JuSwalbe.Macroquant{Array{Float64,1},Array{Float64,1}}
+  height: Array{Float64}((5,)) [1.0, 1.0, 1.0, 1.0, 1.0]
+  velocity: Array{Float64}((5,)) [0.1, 0.1, 0.1, 0.1, 0.1]
+  pressure: Array{Float64}((5,)) [0.0, 0.0, 0.0, 0.0, 0.0]
+  energy: Array{Float64}((5,)) [0.0, 0.0, 0.0, 0.0, 0.0]
+
+julia> mom.height
+5-element Array{Float64,1}:
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+ 1.0
+
+```
+"""
+function simplemoment1d(n::Int; T=Float64)
+  mom = JuSwalbe.Macroquant(height=ones(T, n), velocity=fill(T(0.1),n), pressure=zeros(T, n), energy=zeros(T, n))
   return mom
 end
 
@@ -174,6 +210,17 @@ julia> twovec.x
 """
 function simpleTwovector(n::Int,m::Int; T=Float64)
   xy = JuSwalbe.Twovector(x=fill(T(0.1),(n,m)), y=fill(T(-0.1),(n,m)))
+  return xy
+end
+
+function zeroTwovector(n::Int,m::Int; T=Float64)
+  xy = JuSwalbe.Twovector(x=zeros(T ,(n,m)), y=zeros(T, (n,m)))
+  return xy
+end
+
+function zeroTwovectorCU(n::Int,m::Int; T=Float32)
+  jaja = zeros(n,m)
+  xy = JuSwalbe.Twovector(x=CuArray(jaja), y=CuArray(jaja))
   return xy
 end
 
