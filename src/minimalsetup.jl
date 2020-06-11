@@ -214,7 +214,7 @@ function simpleTwovector(n::Int,m::Int; T=Float64)
 end
 
 function zeroTwovector(n::Int,m::Int; T=Float64)
-  xy = JuSwalbe.Twovector(x=zeros(n,m), y=zeros(n,m))
+  xy = JuSwalbe.Twovector(x=zeros(T ,(n,m)), y=zeros(T, (n,m)))
   return xy
 end
 

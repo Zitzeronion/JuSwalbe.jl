@@ -187,34 +187,34 @@ JuSwalbe.Forces{JuSwalbe.Twovector{Array{Float64,2}}}
 julia> gradp = - ∇p(mom, f)
 5×5×2 Array{Float64,3}:
 [:, :, 1] =
- -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
- -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
-  0.0           0.0          0.0          0.0          0.0
-  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
   0.00166667    0.00097105  -0.0102825    0.00097105   0.00166667
+  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
+ -0.0          -0.0         -0.0         -0.0         -0.0
+ -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
+ -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
 
 [:, :, 2] =
- -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
- -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
-  0.0102825   -0.00277309   0.0   0.00277309   -0.0102825
- -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
- -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
+  0.00166667   0.000137716  -0.0  -0.000137716  -0.00166667
+  0.00097105  -0.00833802   -0.0   0.00833802   -0.00097105
+ -0.0102825    0.00277309   -0.0  -0.00277309    0.0102825
+  0.00097105  -0.00833802   -0.0   0.00833802   -0.00097105
+  0.00166667   0.000137716  -0.0  -0.000137716  -0.00166667
 
-julia> f.h∇p.x
+julia> f.h∇p.x # The force comes with sign          
 5×5 Array{Float64,2}:
- -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
- -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
-  0.0           0.0          0.0          0.0          0.0
-  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
   0.00166667    0.00097105  -0.0102825    0.00097105   0.00166667
+  0.000137716  -0.00833802   0.00277309  -0.00833802   0.000137716
+ -0.0          -0.0         -0.0         -0.0         -0.0
+ -0.000137716   0.00833802  -0.00277309   0.00833802  -0.000137716
+ -0.00166667   -0.00097105   0.0102825   -0.00097105  -0.00166667
 
-julia> f.h∇p.y
+julia> f.h∇p.y # Same as for the x values
 5×5 Array{Float64,2}:
- -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
- -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
-  0.0102825   -0.00277309   0.0   0.00277309   -0.0102825
- -0.00097105   0.00833802   0.0  -0.00833802    0.00097105
- -0.00166667  -0.000137716  0.0   0.000137716   0.00166667
+  0.00166667   0.000137716  -0.0  -0.000137716  -0.00166667
+  0.00097105  -0.00833802   -0.0   0.00833802   -0.00097105
+ -0.0102825    0.00277309   -0.0  -0.00277309    0.0102825
+  0.00097105  -0.00833802   -0.0   0.00833802   -0.00097105
+  0.00166667   0.000137716  -0.0  -0.000137716  -0.00166667
  
 ```
 
@@ -409,47 +409,107 @@ A rather recent new setup for the shape of `Π` can be found in
 """ 
 function Π(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01), θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}   
     # Theoretical minimum of the wetting pontential
+    hbyhstar_n = ones(T, size(mom.height))
+    hbyhstar_m = ones(T, size(mom.height))
+    Π_h = zeros(T, size(mom.height))
     
+    hbyhstar_n = power(h_star ./ mom.height, exponents[1])
+    hbyhstar_m = power(h_star ./ mom.height, exponents[2])
+
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
     Π_h = (γ .* (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1)/((exponents[1] - exponents[2])*h_star) 
-          .* ((h_star ./ mom.height).^exponents[1] .- (h_star ./ mom.height).^exponents[2]))
+          .* (hbyhstar_n .- hbyhstar_m))
     
     return Π_h 
 end
 
 function Π(height::Array{T,2}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01), θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}
     # Theoretical minimum of the wetting potential, two dimensional on array
-    
+    Π_h = zeros(T, size(height))
+
+    hbyhstar_n = power(h_star ./ height, exponents[1])
+    hbyhstar_m = power(h_star ./ height, exponents[2])
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
     Π_h = (γ .* (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
-          .* ((h_star ./ height).^exponents[1] .- (h_star ./ height).^exponents[2]))
+          .* (hbyhstar_n .- hbyhstar_m))
     
     return Π_h 
 end
 # One dimensional implementation
 function Π(mom::JuSwalbe.Macroquant{Vector{T}, Vector{T}}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01), θ::Vector{T}=ones(T,1)*T(1/9)) where {T<:Number}   
     # Theoretical minimum of the wetting pontential
-    
+    Π_h = zeros(T, length(mom.height))
+
+    hbyhstar_n = power(h_star ./ mom.height, exponents[1])
+    hbyhstar_m = power(h_star ./ mom.height, exponents[2])
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
     Π_h = (γ .* (1 .- cospi.(θ)) 
-          .* (exponents[1] - 1)*(exponents[2] - 1)/((exponents[1] - exponents[2])*h_star) 
-          .* ((h_star ./ mom.height).^exponents[1] .- (h_star ./ mom.height).^exponents[2]))
-    
+          .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
+          .* (hbyhstar_n .- hbyhstar_m))
+
     return Π_h 
 end
 
 function Π(height::Array{T,1}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01), θ::Vector{T}=ones(T,1)*T(1/9)) where {T<:Number}
     # Theoretical minimum of the wetting potential, one dimensional on array
-    
+    Π_h = zeros(T, length(height))
+
+    hbyhstar_n = power(h_star ./ height, exponents[1])
+    hbyhstar_m = power(h_star ./ height, exponents[2])
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
     Π_h = (γ .* (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
-          .* ((h_star ./ height).^exponents[1] .- (h_star ./ height).^exponents[2]))
+          .* (hbyhstar_n .- hbyhstar_m))
     
     return Π_h 
 end
+
+"""
+  power(array, n)
+
+Computes the `n`th power elementwise of an `array`.
+
+Turns out this is about **two** times faster than using `.^`, the build in power function.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> h = fill(0.1, (5,5))
+5×5 Array{Float64,2}:
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+ 0.1  0.1  0.1  0.1  0.1
+
+julia> JuSwalbe.power(h, 3)
+5×5 Array{Float64,2}:
+ 0.001  0.001  0.001  0.001  0.001
+ 0.001  0.001  0.001  0.001  0.001
+ 0.001  0.001  0.001  0.001  0.001
+ 0.001  0.001  0.001  0.001  0.001
+ 0.001  0.001  0.001  0.001  0.001
+
+```
+"""
+function power(array::Array{T, 2}, n::Int) where {T<:Number}
+  temp = ones(T, size(array))
+  for i = 1:n
+    temp .*= array
+  end
+  return temp
+end
+function power(array::Array{T, 1}, n::Int) where {T<:Number}
+  temp = ones(T, length(array))
+  for i = 1:n
+    temp .*= array
+  end
+  return temp
+end
+
 
 """
     Δh(mom::JuSwalbe.Macroquant)
