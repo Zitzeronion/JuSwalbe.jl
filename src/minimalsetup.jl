@@ -154,6 +154,14 @@ function simplemoment2d(n::Int, m::Int; T=Float64)
   return mom
 end
 
+function simplemoment2dGPU(n::Int, m::Int; T=Float64)
+  mom = JuSwalbe.Macroquant(height=CUDA.ones(T, (n,m)), 
+                            velocity=JuSwalbe.Twovector(x=CUDA.fill(T(0.1),(n,m)), y=CUDA.fill(T(-0.1),(n,m))), 
+                            pressure=CUDA.zeros(T, (n,m)), 
+                            energy=CUDA.zeros(T,(n,m)))
+  return mom
+end
+
 """
   simplemoment1d(n,type)
 

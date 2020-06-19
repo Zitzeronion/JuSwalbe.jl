@@ -2,7 +2,7 @@ module JuSwalbe
     import Base.Threads.@spawn
     using Pkg
     using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON, Glob, Distributions
-    using Revise
+    using Revise, CUDA
 
     include("minimalsetup.jl")
     include("macroscopic_typs.jl")
@@ -23,7 +23,7 @@ module JuSwalbe
     # Pressure related 
     export Δh, Π, pressure, ∇p
     # Distributions functions and moments
-    export calc_equilibrium_distribution, calculatemoments, dist2array, collisionBGK, streamdistperiodic!, streamdistperiodic
+    export calc_equilibrium_distribution, updateequilibrium!, calculatemoments, dist2array, collisionBGK, streamdistperiodic!, streamdistperiodic
     # Forces
     export computeslip, computethermalcapillarywaves
 

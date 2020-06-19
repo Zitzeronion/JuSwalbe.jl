@@ -152,14 +152,14 @@ function calc_equilibrium_distribution(mom::JuSwalbe.Macroquant{Vector{T}, Vecto
     v = T(1.0)
     vsquare = v^2
     equi_dist = JuSwalbe.DistributionD1Q3(f0=zeros(T, len), f1=zeros(T, len), f2=zeros(T, len))
-    equi_dist.f0 = (mom.height .- 1/(2*vsquare) * gravity .* mom.height.^2 
-                    .- 1/vsquare .* mom.height .* mom.velocity.^2)
-    equi_dist.f1 = (1/(4*vsquare) * gravity .* mom.height.^2 
+    equi_dist.f0 = (mom.height .- 1/(2*vsquare) * gravity .* mom.height .* mom.height 
+                    .- 1/vsquare .* mom.height .* mom.velocity .* mom.velocity)
+    equi_dist.f1 = (1/(4*vsquare) * gravity .* mom.height .* mom.height 
                     .+ 1/(2*v) .* mom.height .* mom.velocity 
-                    .+ 1/(2*vsquare) .* mom.height .* mom.velocity.^2)
-    equi_dist.f2 = (1/(4*vsquare) * gravity .* mom.height.^2 
+                    .+ 1/(2*vsquare) .* mom.height .* mom.velocity .* mom.velocity)
+    equi_dist.f2 = (1/(4*vsquare) * gravity .* mom.height .* mom.height 
                     .- 1/(2*v) .* mom.height .* mom.velocity 
-                    .+ 1/(2*vsquare) .* mom.height .* mom.velocity.^2)
+                    .+ 1/(2*vsquare) .* mom.height .* mom.velocity .* mom.velocity)
         
     return equi_dist
 end
@@ -192,25 +192,24 @@ function calc_equilibrium_distribution(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwa
     # Again make use dicts for iteration purpose
     equiarray = dist2array(equi_dist)
     # Calculate f0
-    equiarray[1, :, :] .= mom.height .+ weights[1] * mom.height .*(T(-15.0/8.0) * gravity * mom.height .- T(3.0/2.0) * udotu)
+    equi_dist.f0 .= mom.height .+ weights[1] * mom.height .*(T(-15.0/8.0) * gravity * mom.height .- T(3.0/2.0) * udotu)
     # And the other 8 distribtuion functions
     for i in 2:9
         latticeveldotu = mom.velocity.x * lattice_vel[i,1] .+ mom.velocity.y * lattice_vel[i,2]
         equiarray[i, :, :] .= weights[i] * mom.height .* (T(3.0/2.0) * gravity * mom.height
                                                           .+ T(3) * latticeveldotu 
-                                                          .+ T(9.0/2.0) * latticeveldotu.^2 
+                                                          .+ T(9.0/2.0) * (latticeveldotu .* latticeveldotu) 
                                                           .- T(3.0/2.0) * udotu)
     end
     # Save them to the distrubtion type which was created earlier
-    equi_dist = JuSwalbe.DistributionD2Q9(f0=equiarray[1, :, :],
-                                          f1=equiarray[2, :, :],
-                                          f2=equiarray[3, :, :],
-                                          f3=equiarray[4, :, :],
-                                          f4=equiarray[5, :, :],
-                                          f5=equiarray[6, :, :],
-                                          f6=equiarray[7, :, :],
-                                          f7=equiarray[8, :, :],
-                                          f8=equiarray[9, :, :])
+    equi_dist.f1 = equiarray[2, :, :]
+    equi_dist.f2 = equiarray[3, :, :]
+    equi_dist.f3 = equiarray[4, :, :]
+    equi_dist.f4 = equiarray[5, :, :]
+    equi_dist.f5 = equiarray[6, :, :]
+    equi_dist.f6 = equiarray[7, :, :]
+    equi_dist.f7 = equiarray[8, :, :]
+    equi_dist.f8 = equiarray[9, :, :]
 
     # And return it :)
     return equi_dist
@@ -264,7 +263,76 @@ julia> JuSwalbe.velocitysquared(moment)
 ```
 """
 function velocitysquared(mom::Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}) where {T<:Number}
-    velsquared = mom.velocity.x.^2 .+ mom.velocity.y.^2
+    velsquared = (mom.velocity.x .* mom.velocity.x) .+ (mom.velocity.y .* mom.velocity.y)
     return velsquared
 end
+# For the GPU
+function velocitysquared(mom::JuSwalbe.Macroquant{CUDA.CuArray{T, 2, Nothing}, JuSwalbe.Twovector{CUDA.CuArray{T, 2, Nothing}}}) where {T<:Number}
+  velsquared = (mom.velocity.x .* mom.velocity.x) .+ (mom.velocity.y .* mom.velocity.y)
+  return velsquared
+end
 
+
+function updateequilibrium!(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}, equilibrium::Array{T,3}; gravity::T=T(0)) where {T<:Number}
+  # In two dimensions there is a little more work needed
+  width = size(mom.height,1)
+  thick = size(mom.height,2)
+
+  equilibrium .= T(0)
+  latticeveldotu = zeros(T, (width, thick))
+
+  # Standard D2Q9 weights and lattice velocities
+  # For type security, otherwise weights will always be Float64
+  weights = [T(4/9), T(1/9), T(1/9), T(1/9), T(1/9), T(1/36), T(1/36), T(1/36), T(1/36)]
+  lattice_vel = [0 0; 1 0; 0 1; -1 0; 0 -1; 1 1; -1 1; -1 -1; 1 -1]
+
+  # Calculate the velocity squared
+  udotu = velocitysquared(mom)
+  
+  # Calculate f0
+  equilibrium[1, :, :] .= mom.height .+ weights[1] .* mom.height .*(T(-15.0/8.0) .* gravity .* mom.height .- T(3.0/2.0) .* udotu)
+  # And the other 8 distribtuion functions
+  @inbounds for i in 2:9
+      latticeveldotu .= mom.velocity.x .* lattice_vel[i,1] .+ mom.velocity.y .* lattice_vel[i,2]
+      equilibrium[i, :, :] .= weights[i] .* mom.height .* (T(1.5) .* gravity .* mom.height
+                                                        .+ T(3) .* latticeveldotu 
+                                                        .+ T(4.5) .* (latticeveldotu .* latticeveldotu) 
+                                                        .- T(1.5) .* udotu)
+  end
+  # Save them to the distrubtion type which was created earlier
+
+  # And return it :)
+end
+
+function updateequilibrium!(mom::JuSwalbe.Macroquant{CUDA.CuArray{T, 2, Nothing}, JuSwalbe.Twovector{CUDA.CuArray{T, 2, Nothing}}}; gravity::T=T(0)) where {T<:Number}
+  # In two dimensions there is a little more work needed
+  width = size(mom.height,1)
+  thick = size(mom.height,2)
+
+  v = 1.0
+  vsquare = v^2
+  # Standard D2Q9 weights and lattice velocities
+  # For type security, otherwise weights will always be Float64
+  weights = [T(4/9), T(1/9), T(1/9), T(1/9), T(1/9), T(1/36), T(1/36), T(1/36), T(1/36)]
+  
+  lattice_vel = [0 0; 1 0; 0 1; -1 0; 0 -1; 1 1; -1 1; -1 -1; 1 -1]
+
+  # Calculate the velocity squared
+  udotu = velocitysquared(mom)
+  # Again make use dicts for iteration purpose
+  equiarray = zeros(T, (9, width, thick))
+  # Calculate f0
+  equiarray[1, :, :] .= mom.height .+ weights[1] * mom.height .*(T(-15.0/8.0) * gravity * mom.height .- T(3.0/2.0) * udotu)
+  # And the other 8 distribtuion functions
+  for i in 2:9
+      latticeveldotu = mom.velocity.x * lattice_vel[i,1] .+ mom.velocity.y * lattice_vel[i,2]
+      equiarray[i, :, :] .= weights[i] * mom.height .* (T(3.0/2.0) * gravity * mom.height
+                                                        .+ T(3) * latticeveldotu 
+                                                        .+ T(9.0/2.0) * (latticeveldotu .* latticeveldotu) 
+                                                        .- T(3.0/2.0) * udotu)
+  end
+  # Save them to the distrubtion type which was created earlier
+
+  # And return it :)
+  return equiarray
+end

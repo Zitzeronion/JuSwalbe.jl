@@ -502,6 +502,13 @@ function power(array::Array{T, 2}, n::Int) where {T<:Number}
   end
   return temp
 end
+function power(array::CuArray{T,2,Nothing}, n::Int) where {T<:Number}
+  temp = ones(T, size(array))
+  for i = 1:n
+    temp .*= array
+  end
+  return temp
+end
 function power(array::Array{T, 1}, n::Int) where {T<:Number}
   temp = ones(T, length(array))
   for i = 1:n
@@ -657,8 +664,9 @@ function Δh(mom::JuSwalbe.Macroquant{Matrix{T}, Twovector{Matrix{T}}}) where {T
     # Get the size of the problem
     width, thick = size(mom.height)
     # Build a wrap around to mimic periodic boundaries
-    wrapper = 1
-    toruswrapped = padarray(mom.height, Pad(:circular, wrapper, wrapper))
+    wrap_x = 1
+    wrap_y = 1
+    toruswrapped = padarray(mom.height, Pad(:circular, wrap_x, wrap_y))
     # Generate a dummy array for the solution
     Δ = zeros(T, size(toruswrapped))
     # Exclude the wrapped boundaries
