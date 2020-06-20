@@ -77,14 +77,8 @@ In the example a linear increasing height field was used, an equilibrium though 
 - [Dynamics and stability of thin liquid films](https://journals.aps.org/rmp/abstract/10.1103/RevModPhys.81.1131)
 """
 function pressure(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}; γ::T=T(0.01), θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}
-    # Dummy array to store the result
-    p = zeros(T, size(mom.height))
     # All calculation needed here
-    p = -γ * Δh(mom) .+ Π(mom, γ=γ, θ=θ)
-    # Write the solution into the struct as well
-    mom.pressure = p
-
-    return p
+    mom.pressure .= -γ .* Δh(mom) .+ Π(mom, γ=γ, θ=θ)
 end
 
 function pressure(height::Array{T,2}; γ::T=0.01, θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}

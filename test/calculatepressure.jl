@@ -134,18 +134,18 @@
             testheight = ones(type, (N,M))
             moment = JuSwalbe.Macroquant(testheight, JuSwalbe.Twovector(zeros(type ,(N,M)),zeros(type ,(N,M))), zeros(type ,(N,M)), zeros(type ,(N,M)))
             # Make the pressure calculation
-            test_pressure1 = pressure(moment, γ=type(1.0), θ=zeros(type,(1,1)))
-            test_pressure2 = pressure(moment, γ=type(1.0), θ=zeros(type,(1,1)))
+            pressure(moment, γ=type(1.0), θ=zeros(type,(1,1)))
+            test_pressure = pressure(testheight, γ=type(1.0), θ=zeros(type,(1,1)))
             # Test the dimensions
-            @test isa(test_pressure1, Array{type, 2})
-            @test isa(test_pressure2, Array{type, 2})
-            @test size(test_pressure1) == (N,M)
-            @test size(test_pressure2) == (N,M)
+            @test isa(moment.pressure, Array{type, 2})
+            @test isa(test_pressure, Array{type, 2})
+            @test size(moment.pressure) == (N,M)
+            @test size(test_pressure) == (N,M)
             result = type(0.0)
             # Compare the results
             for j in 1:M, i in 1:N
-                @test test_pressure1[i,j] == result
-                @test test_pressure1[i,j] == result
+                @test moment.pressure[i,j] == result
+                @test test_pressure[i,j] == result
             end
         end
     end
@@ -157,18 +157,18 @@
             testheight = ones(type, N)
             moment = JuSwalbe.Macroquant(testheight, zeros(type ,N), zeros(type ,N), zeros(type ,N))
             # Make the pressure calculation
-            test_pressure1 = pressure(moment, γ=type(1.0), θ=zeros(type, 1))
-            test_pressure2 = pressure(moment, γ=type(1.0), θ=zeros(type, 1))
+            pressure(moment, γ=type(1.0), θ=zeros(type, 1))
+            test_pressure = pressure(testheight, γ=type(1.0), θ=zeros(type, 1))
             # Test the dimensions
-            @test isa(test_pressure1, Array{type, 1})
-            @test isa(test_pressure2, Array{type, 1})
-            @test length(test_pressure1) == N
-            @test length(test_pressure2) == N
+            @test isa(moment.pressure, Array{type, 1})
+            @test isa(test_pressure, Array{type, 1})
+            @test length(moment.pressure) == N
+            @test length(test_pressure) == N
             result = type(0.0)
             # Compare the results
             for i in 1:N
-                @test test_pressure1[i] == result
-                @test test_pressure1[i] == result
+                @test moment.pressure[i] == result
+                @test test_pressure[i] == result
             end
         end
     end
@@ -180,17 +180,17 @@
             testheight = ones(type, (N,M)) .* reshape(collect(1:N*M),N,M)
             moment = JuSwalbe.Macroquant(testheight, JuSwalbe.Twovector(zeros(type ,(N,M)),zeros(type ,(N,M))), zeros(type ,(N,M)), zeros(type ,(N,M)))
             
-            test_pressure1 = pressure(moment, θ=zeros(type, (1,1)), γ=type(0.1))
-            test_pressure2 = pressure(testheight, θ=zeros(type, (1,1)), γ=type(0.1))
+            pressure(moment, θ=zeros(type, (1,1)), γ=type(0.1))
+            test_pressure = pressure(testheight, θ=zeros(type, (1,1)), γ=type(0.1))
             # Test the dimensions
-            @test isa(test_pressure1, Array{type,2})
-            @test isa(test_pressure2, Array{type,2})
-            @test size(test_pressure1) == (N,M)
-            @test size(test_pressure2) == (N,M)
+            @test isa(moment.pressure, Array{type,2})
+            @test isa(test_pressure, Array{type,2})
+            @test size(moment.pressure) == (N,M)
+            @test size(test_pressure) == (N,M)
             # Compare the results
             for i in 1:N, j in 1:M
-                @test test_pressure1[i,j] - (type(-0.1)*Δh(moment))[i,j] ≈ type(0.0) atol = tolerances[type]
-                @test test_pressure2[i,j] - (type(-0.1)*Δh(testheight))[i,j] ≈ type(0.0) atol = tolerances[type]
+                @test moment.pressure[i,j] - (type(-0.1)*Δh(moment))[i,j] ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure[i,j] - (type(-0.1)*Δh(testheight))[i,j] ≈ type(0.0) atol = tolerances[type]
             end
         end
     end
@@ -202,17 +202,17 @@
             testheight = ones(type, N) .* collect(1:N)
             moment = JuSwalbe.Macroquant(testheight, zeros(type ,N), zeros(type ,N), zeros(type ,N))
             
-            test_pressure1 = pressure(moment, θ=zeros(type, 1), γ=type(0.1))
-            test_pressure2 = pressure(testheight, θ=zeros(type, 1), γ=type(0.1))
+            pressure(moment, θ=zeros(type, 1), γ=type(0.1))
+            test_pressure = pressure(testheight, θ=zeros(type, 1), γ=type(0.1))
             # Test the dimensions
-            @test isa(test_pressure1, Array{type,1})
-            @test isa(test_pressure2, Array{type,1})
-            @test length(test_pressure1) == N
-            @test length(test_pressure2) == N
+            @test isa(moment.pressure, Array{type,1})
+            @test isa(test_pressure, Array{type,1})
+            @test length(moment.pressure) == N
+            @test length(test_pressure) == N
             # Compare the results
             for i in 1:N
-                @test test_pressure1[i] - (type(-0.1)*Δh(moment))[i] ≈ type(0.0) atol = tolerances[type]
-                @test test_pressure2[i] - (type(-0.1)*Δh(testheight))[i] ≈ type(0.0) atol = tolerances[type]
+                @test moment.pressure[i] - (type(-0.1)*Δh(moment))[i] ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure[i] - (type(-0.1)*Δh(testheight))[i] ≈ type(0.0) atol = tolerances[type]
             end
         end
     end
@@ -224,17 +224,17 @@
             testheight = ones(type, (N,M))
             moment = JuSwalbe.Macroquant(testheight, JuSwalbe.Twovector(zeros(type ,(N,M)),zeros(type ,(N,M))), zeros(type ,(N,M)), zeros(type ,(N,M)))
             # Make the laplace calculation
-            test_pressure1 = pressure(moment, γ=type(1.0))
-            test_pressure2 = pressure(testheight, γ=type(1.0))
+            pressure(moment, γ=type(1.0))
+            test_pressure = pressure(testheight, γ=type(1.0))
             # Test the dimensions
-            @test isa(test_pressure1, Array{type,2})
-            @test isa(test_pressure2, Array{type,2})
-            @test size(test_pressure1) == (N,M)
-            @test size(test_pressure2) == (N,M)
+            @test isa(moment.pressure, Array{type,2})
+            @test isa(test_pressure, Array{type,2})
+            @test size(moment.pressure) == (N,M)
+            @test size(test_pressure) == (N,M)
             # Compare the results
             for i in 1:N, j in 1:M
-                @test test_pressure1[i,j] - Π(moment, γ=type(1.0))[i,j] ≈ type(0.0) atol = tolerances[type]
-                @test test_pressure2[i,j] - Π(testheight, γ=type(1.0))[i,j] ≈ type(0.0) atol = tolerances[type]
+                @test moment.pressure[i,j] - Π(moment, γ=type(1.0))[i,j] ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure[i,j] - Π(testheight, γ=type(1.0))[i,j] ≈ type(0.0) atol = tolerances[type]
             end
         end
     end
@@ -246,17 +246,17 @@
             testheight = ones(type, N)
             moment = JuSwalbe.Macroquant(testheight, zeros(type ,N), zeros(type ,N), zeros(type ,N))
                 
-            test_pressure1 = pressure(moment, γ=type(1.0))
-            test_pressure2 = pressure(testheight, γ=type(1.0))
+            pressure(moment, γ=type(1.0))
+            test_pressure = pressure(testheight, γ=type(1.0))
             # Test the dimensions
-            @test isa(test_pressure1, Array{type,1})
-            @test isa(test_pressure2, Array{type,1})
-            @test length(test_pressure1) == N
-            @test length(test_pressure2) == N
+            @test isa(moment.pressure, Array{type,1})
+            @test isa(test_pressure, Array{type,1})
+            @test length(moment.pressure) == N
+            @test length(test_pressure) == N
             # Compare the results
             for i in 1:N
-                @test test_pressure1[i] - Π(moment, γ=type(1.0))[i] ≈ type(0.0) atol = tolerances[type]
-                @test test_pressure2[i] - Π(testheight, γ=type(1.0))[i] ≈ type(0.0) atol = tolerances[type]
+                @test moment.pressure[i] - Π(moment, γ=type(1.0))[i] ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure[i] - Π(testheight, γ=type(1.0))[i] ≈ type(0.0) atol = tolerances[type]
             end
         end
     end
@@ -269,18 +269,18 @@
             moment = JuSwalbe.Macroquant(testheight, JuSwalbe.Twovector(zeros(type ,(N,M)),zeros(type ,(N,M))), zeros(type ,(N,M)), zeros(type ,(N,M)))
         
             # Make the laplace calculation
-            test_pressure1 = pressure(moment, γ=type(1.0))
-            test_pressure2 = pressure(testheight, γ=type(1.0))
+            pressure(moment, γ=type(1.0))
+            test_pressure = pressure(testheight, γ=type(1.0))
             # Test the dimensions
-            @test isa(test_pressure1, Array{type,2})
-            @test isa(test_pressure2, Array{type,2})
-            @test size(test_pressure1) == (N,M)
-            @test size(test_pressure2) == (N,M)
+            @test isa(moment.pressure, Array{type,2})
+            @test isa(test_pressure, Array{type,2})
+            @test size(moment.pressure) == (N,M)
+            @test size(test_pressure) == (N,M)
             
             # Compare the results
             for j in 1:M, i in 1:N
-                @test test_pressure1[i,j] - (type(-1.0)*Δh(moment)[i,j] + Π(moment, γ=type(1.0))[i,j]) ≈ type(0.0) atol = tolerances[type]
-                @test test_pressure2[i,j] - (type(-1.0)*Δh(testheight)[i,j] + Π(testheight, γ=type(1.0))[i,j]) ≈ type(0.0) atol = tolerances[type]
+                @test moment.pressure[i,j] - (type(-1.0)*Δh(moment)[i,j] + Π(moment, γ=type(1.0))[i,j]) ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure[i,j] - (type(-1.0)*Δh(testheight)[i,j] + Π(testheight, γ=type(1.0))[i,j]) ≈ type(0.0) atol = tolerances[type]
             end
         end
     end
@@ -293,18 +293,18 @@
             moment = JuSwalbe.Macroquant(testheight, zeros(type ,N), zeros(type ,N), zeros(type ,N))
         
             # Make the laplace calculation
-            test_pressure1 = pressure(moment, γ=type(1.0))
-            test_pressure2 = pressure(testheight, γ=type(1.0))
+            pressure(moment, γ=type(1.0))
+            test_pressure = pressure(testheight, γ=type(1.0))
             # Test the dimensions
-            @test isa(test_pressure1, Array{type,1})
-            @test isa(test_pressure2, Array{type,1})
-            @test length(test_pressure1) == N
-            @test length(test_pressure2) == N
+            @test isa(moment.pressure, Array{type,1})
+            @test isa(test_pressure, Array{type,1})
+            @test length(moment.pressure) == N
+            @test length(test_pressure) == N
             
             # Compare the results
             for i in 1:N
-                @test test_pressure1[i] - (type(-1.0)*Δh(moment)[i] + Π(moment, γ=type(1.0))[i]) ≈ type(0.0) atol = tolerances[type]
-                @test test_pressure2[i] - (type(-1.0)*Δh(testheight)[i] + Π(testheight, γ=type(1.0))[i]) ≈ type(0.0) atol = tolerances[type]
+                @test moment.pressure[i] - (type(-1.0)*Δh(moment)[i] + Π(moment, γ=type(1.0))[i]) ≈ type(0.0) atol = tolerances[type]
+                @test test_pressure[i] - (type(-1.0)*Δh(testheight)[i] + Π(testheight, γ=type(1.0))[i]) ≈ type(0.0) atol = tolerances[type]
             end
         end
     end
