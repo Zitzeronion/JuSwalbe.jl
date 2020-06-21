@@ -110,6 +110,14 @@ function pressure(height::Array{T,1}; γ::T=0.01, θ::Vector{T}=ones(T,1)*T(1/9)
     return p
 end
 
+function pressure2(arg; γ=0.01, θ=ones(1)*1/9)
+
+  # All calculation needed here
+  p = -γ * Δh(arg) .+ Π_broadcast(arg, γ=γ, θ=θ)
+
+  return p
+end
+
 """
     ∇p(mom::JuSwalbe.Macroquant)
 
