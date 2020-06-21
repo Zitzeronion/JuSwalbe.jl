@@ -406,11 +406,11 @@ function Π(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}; 
     Π_h = zeros(T, size(mom.height))
     hstaroverh = h_star ./ mom.height
     
-    hbyhstar_n = (hstaroverh).^exponents[1]
-    hbyhstar_m = (hstaroverh).^exponents[2]
+    hbyhstar_n = power_broadcast.(hstaroverh, exponents[1])
+    hbyhstar_m = power_broadcast.(hstaroverh, exponents[2])
 
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
-    Π_h = (γ * (1 .- cospi.(θ)) 
+    Π_h .= (γ * (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1)/((exponents[1] - exponents[2])*h_star) 
           .* (hbyhstar_n .- hbyhstar_m))
     
@@ -423,10 +423,10 @@ function Π(height::Array{T,2}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01)
 
     hstaroverh = h_star ./ height
     
-    hbyhstar_n = (hstaroverh).^exponents[1]
-    hbyhstar_m = (hstaroverh).^exponents[2]
+    hbyhstar_n = power_broadcast.(hstaroverh, exponents[1])
+    hbyhstar_m = power_broadcast.(hstaroverh, exponents[2])
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
-    Π_h = (γ * (1 .- cospi.(θ)) 
+    Π_h .= (γ * (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
           .* (hbyhstar_n .- hbyhstar_m))
     
