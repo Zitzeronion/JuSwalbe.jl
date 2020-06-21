@@ -411,7 +411,7 @@ function Π(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}; 
     hbyhstar_m = power(h_star ./ mom.height, exponents[2])
 
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
-    Π_h = (γ .* (1 .- cospi.(θ)) 
+    Π_h .= (γ .* (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1)/((exponents[1] - exponents[2])*h_star) 
           .* (hbyhstar_n .- hbyhstar_m))
     
@@ -438,10 +438,13 @@ function Π(mom::JuSwalbe.Macroquant{Vector{T}, Vector{T}}; h_star::T=T(0.1), ex
 
     hbyhstar_n = power(h_star ./ mom.height, exponents[1])
     hbyhstar_m = power(h_star ./ mom.height, exponents[2])
+
+    θ_single = θ[1,1]
+    κ = γ * (1 .- cospi(θ_single)) .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star)
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
-    Π_h = (γ .* (1 .- cospi.(θ)) 
-          .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
-          .* (hbyhstar_n .- hbyhstar_m))
+    Threads.@threads for i in eachindex(Π_h)
+      Π_h[i] =  κ * (hbyhstar_n[i] - hbyhstar_m[i])
+    end
 
     return Π_h 
 end
@@ -452,12 +455,33 @@ function Π(height::Array{T,1}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01)
 
     hbyhstar_n = power(h_star ./ height, exponents[1])
     hbyhstar_m = power(h_star ./ height, exponents[2])
+    θ_single = θ[1]
+    κ = γ * (1 - cospi(θ_single)) * (exponents[1] - 1) * (exponents[2] - 1) / ((exponents[1] - exponents[2]) * h_star)
+
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
-    Π_h = (γ .* (1 .- cospi.(θ)) 
-          .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
-          .* (hbyhstar_n .- hbyhstar_m))
+    # Threads.@threads for i in eachindex(Π_h)
+    #   Π_h[i] =  κ * (hbyhstar_n[i] - hbyhstar_m[i])
+    # end
+    Π_h .=  κ .* (hbyhstar_n .- hbyhstar_m)
     
+
     return Π_h 
+end
+
+function Π_broadcast(arg; h_star=0.1, exponents=[9,3], γ=0.01, θ=1/9)   
+  # Theoretical minimum of the wetting pontential
+  hbyhstar_n = 1.0
+  hbyhstar_m = 1.0
+  Π_h = 0.0
+  hbyhstar_n = power_broadcast.(h_star ./ arg, exponents[1])
+  hbyhstar_m = power_broadcast.(h_star ./ arg, exponents[2])
+
+  κ = γ * (1 - CUDA.cospi(θ[1,1])) * (exponents[1] - 1) * (exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star)
+
+  # Actual formular of the disjoining potential, long range attracion short range repulsion.
+  Π_h = κ * (hbyhstar_n .- hbyhstar_m)
+  
+  return Π_h 
 end
 
 """
@@ -491,14 +515,7 @@ julia> JuSwalbe.power(h, 3)
 """
 function power(array::Array{T, 2}, n::Int) where {T<:Number}
   temp = ones(T, size(array))
-  for i = 1:n
-    temp .*= array
-  end
-  return temp
-end
-function power(array::CuArray{T,2,Nothing}, n::Int) where {T<:Number}
-  temp = ones(T, size(array))
-  for i = 1:n
+  Threads.@threads for i = 1:n
     temp .*= array
   end
   return temp
@@ -507,6 +524,36 @@ function power(array::Array{T, 1}, n::Int) where {T<:Number}
   temp = ones(T, length(array))
   for i = 1:n
     temp .*= array
+  end
+  return temp
+end
+
+"""
+  power_broadcast(arg, power)
+
+Computes the `power` of `arg`, where `power` is an integer.
+
+# Example
+```jldoctest
+julia> using JuSwalbe
+
+julia> x = 3
+3
+julia> y = power_broadcast(3,3)
+27
+
+julia> x = fill(0.2, (100, 100));
+
+julia> y = power_broadcast.(x, 2);
+
+julia> y[1,1]
+0.04000000000000001
+```
+"""
+function power_broadcast(arg, power::Int)
+  temp = 1.0
+  for i in 1:power
+    temp *= arg    
   end
   return temp
 end
