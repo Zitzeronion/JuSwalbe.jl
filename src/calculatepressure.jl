@@ -78,7 +78,7 @@ In the example a linear increasing height field was used, an equilibrium though 
 """
 function pressure(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}; γ::T=T(0.01), θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}
     # All calculation needed here
-    mom.pressure .= -γ .* Δh(mom) .+ Π(mom, γ=γ, θ=θ)
+    mom.pressure = -γ * Δh(mom) .+ Π(mom, γ=γ, θ=θ)
 end
 
 function pressure(height::Array{T,2}; γ::T=0.01, θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}
@@ -476,7 +476,7 @@ function Π_broadcast(arg; h_star=0.1, exponents=[9,3], γ=0.01, θ=1/9)
   hbyhstar_n = power_broadcast.(h_star ./ arg, exponents[1])
   hbyhstar_m = power_broadcast.(h_star ./ arg, exponents[2])
 
-  κ = γ * (1 - CUDA.cospi(θ[1,1])) * (exponents[1] - 1) * (exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star)
+  κ = γ * (1 - cospi(θ[1,1])) * (exponents[1] - 1) * (exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star)
 
   # Actual formular of the disjoining potential, long range attracion short range repulsion.
   Π_h = κ * (hbyhstar_n .- hbyhstar_m)
