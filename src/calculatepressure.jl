@@ -78,7 +78,7 @@ In the example a linear increasing height field was used, an equilibrium though 
 """
 function pressure(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}; γ::T=T(0.01), θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}
     # All calculation needed here
-    mom.pressure .= -γ .* Δh(mom) .+ Π(mom, γ=γ, θ=θ)
+    mom.pressure = -γ * Δh(mom) .+ Π(mom, γ=γ, θ=θ)
 end
 
 function pressure(height::Array{T,2}; γ::T=0.01, θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}
@@ -108,6 +108,14 @@ function pressure(height::Array{T,1}; γ::T=0.01, θ::Vector{T}=ones(T,1)*T(1/9)
     p = -γ * Δh(height) .+ Π(height, γ=γ, θ=θ)
 
     return p
+end
+
+function pressure2(arg; γ=0.01, θ=ones(1)*1/9)
+
+  # All calculation needed here
+  p = -γ * Δh(arg) .+ Π_broadcast(arg, γ=γ, θ=θ)
+
+  return p
 end
 
 """
@@ -403,15 +411,14 @@ A rather recent new setup for the shape of `Π` can be found in
 """ 
 function Π(mom::JuSwalbe.Macroquant{Matrix{T}, JuSwalbe.Twovector{Matrix{T}}}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01), θ::Matrix{T}=ones(T,(1,1))*T(1/9)) where {T<:Number}   
     # Theoretical minimum of the wetting pontential
-    hbyhstar_n = ones(T, size(mom.height))
-    hbyhstar_m = ones(T, size(mom.height))
     Π_h = zeros(T, size(mom.height))
+    hstaroverh = h_star ./ mom.height
     
-    hbyhstar_n = power(h_star ./ mom.height, exponents[1])
-    hbyhstar_m = power(h_star ./ mom.height, exponents[2])
+    hbyhstar_n = power_broadcast.(hstaroverh, exponents[1])
+    hbyhstar_m = power_broadcast.(hstaroverh, exponents[2])
 
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
-    Π_h .= (γ .* (1 .- cospi.(θ)) 
+    Π_h .= (γ * (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1)/((exponents[1] - exponents[2])*h_star) 
           .* (hbyhstar_n .- hbyhstar_m))
     
@@ -422,10 +429,12 @@ function Π(height::Array{T,2}; h_star::T=T(0.1), exponents=[9,3], γ::T=T(0.01)
     # Theoretical minimum of the wetting potential, two dimensional on array
     Π_h = zeros(T, size(height))
 
-    hbyhstar_n = power(h_star ./ height, exponents[1])
-    hbyhstar_m = power(h_star ./ height, exponents[2])
+    hstaroverh = h_star ./ height
+    
+    hbyhstar_n = power_broadcast.(hstaroverh, exponents[1])
+    hbyhstar_m = power_broadcast.(hstaroverh, exponents[2])
     # Actual formular of the disjoining potential, long range attracion short range repulsion.
-    Π_h = (γ .* (1 .- cospi.(θ)) 
+    Π_h .= (γ * (1 .- cospi.(θ)) 
           .* (exponents[1] - 1)*(exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star) 
           .* (hbyhstar_n .- hbyhstar_m))
     
@@ -476,7 +485,7 @@ function Π_broadcast(arg; h_star=0.1, exponents=[9,3], γ=0.01, θ=1/9)
   hbyhstar_n = power_broadcast.(h_star ./ arg, exponents[1])
   hbyhstar_m = power_broadcast.(h_star ./ arg, exponents[2])
 
-  κ = γ * (1 - CUDA.cospi(θ[1,1])) * (exponents[1] - 1) * (exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star)
+  κ = γ * (1 - cospi(θ[1,1])) * (exponents[1] - 1) * (exponents[2] - 1) / ((exponents[1] - exponents[2])*h_star)
 
   # Actual formular of the disjoining potential, long range attracion short range repulsion.
   Π_h = κ * (hbyhstar_n .- hbyhstar_m)

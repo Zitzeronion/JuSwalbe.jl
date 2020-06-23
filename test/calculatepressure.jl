@@ -69,13 +69,11 @@
 
     @testset "Disjoining pressure two dimensions" begin
         N, M = (4,4)
-
-        typelist = [Float16 Float32 Float64]
-        for type in typelist
+        for type in [Float16 Float32 Float64]
             testheight = ones(type, (N,M)) .* reshape(collect(1:N*M),N,M)
             moment = JuSwalbe.Macroquant(testheight, JuSwalbe.Twovector(ones(type, (N,M)),ones(type, (N,M))), zeros(type, (N,M)), zeros(type, (N,M)))
             
-            # Make the laplace calculation
+            # Make the disjoining calculation
             test_disj1 = Π(moment)
             @test isa(test_disj1, Array{type, 2})
             test_disj2 = Π(testheight)
