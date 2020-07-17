@@ -1,5 +1,3 @@
-using Plots
-
 function runsimulation_1D(input::JuSwalbe.Inputconstants)
     lx = input.lx
     ly = input.ly
@@ -112,10 +110,10 @@ function runsimulation_2D(input::JuSwalbe.Inputconstants)
             end
 
         end
-        s1 = heatmap(h0)
-        s2 = heatmap(fetch(mom).height)
-        plot(s1, s2)
-        gui()
+        scene = heatmap(h0)
+        #s2 = heatmap(fetch(mom).height)
+        #plot(s1, s2)
+        #gui()
         return mom
     end
 

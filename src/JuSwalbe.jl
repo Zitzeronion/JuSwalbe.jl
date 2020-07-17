@@ -1,7 +1,7 @@
 module JuSwalbe
     import Base.Threads.@spawn
     using Pkg
-    using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON, Glob, Distributions
+    using DelimitedFiles, JSON, DrWatson, Images, Parameters, BSON, Glob, Distributions, Makie
     using Revise, CUDA
 
     include("minimalsetup.jl")
@@ -14,7 +14,7 @@ module JuSwalbe
     include("forcing.jl")
     include("collide.jl")
     include("readwritedata.jl")
-    # include("startrun.jl")
+    include("startrun.jl")
 
     # IO related
     export readinput, findargument, minimalsetup1d, minimalsetup2d, simplemoment2d, simpleTwovector, zeroTwovector, simpledistD2Q9, simplemoment1d

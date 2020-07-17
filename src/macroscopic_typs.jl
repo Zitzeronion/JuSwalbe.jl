@@ -22,4 +22,21 @@ end
     y::T
 end
 
+@with_kw mutable struct GPUvec <: Macroscopic_quantity
+    x::CuArray{Float32,2,Nothing}
+    y::CuArray{Float32,2,Nothing}
+end
 
+@with_kw mutable struct MacroquantGPU <: Macroscopic_quantity
+    height::CuArray{Float32,2,Nothing}
+    velocity::GPUvec
+    pressure::CuArray{Float32,2,Nothing}
+    energy::CuArray{Float32,2,Nothing}
+end
+
+@with_kw mutable struct ForcesGPU <: Macroscopic_quantity
+    slip::GPUvec
+    h∇p::GPUvec
+    bathymetry::GPUvec
+    thermal::GPUvec
+end
