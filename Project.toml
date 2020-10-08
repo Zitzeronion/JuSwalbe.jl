@@ -23,6 +23,7 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 [compat]
 BSON = "0.2"
 Coverage = "1.1"
+Distributions = "0.24"
 Documenter = "^0.24"
 DocumenterTools = "^0.1"
 DrWatson = "^1.10"
